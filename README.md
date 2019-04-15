@@ -1,2 +1,2 @@
-# dcnet
-Dreams Cartography Network software
+# DCNet
+Dreams Cartography Network
