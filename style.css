@@ -1,0 +1,20 @@
+a {
+	color: black;
+	font-family: monospace;
+}
+.enterbutton {
+	height: 50;
+	width: 45;
+	font-size: 30;
+}	
+.label {
+	cursor: default;
+}
+.title {
+	font-size: 18;
+	padding: 8 0;
+}
+.error_msg {
+	font-size: small;
+	color: #e88;
+}
