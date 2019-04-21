@@ -5,9 +5,10 @@
 		redirect('/');
 	}
 
+	$scripts=['entry.js'];
+	$onload='entry_onload();';
 	require('header.php');
 ?>
-<form method="post" action="login.php" autocomplete="off">
 	<table>
 		<tr>
 			<td>&nbsp;</td>
@@ -22,15 +23,15 @@
 			<td>
 				<input
 					class="textinput start_focus" 
-					name="user" 
+					name="user" id="user" 
 					tabindex="1" />
 			</td>
 			<td rowspan="2">
-				<input 
+				<button 
 					class="enterbutton" 
-					type="submit"
-					value="&#x2386;" 
-					tabindex="3" />
+					tabindex="3"
+					onclick="login_btn_clicked();"
+					id="enter_btn">&#x2386;</button>
 			</td>	
 		</tr>
 		<tr>
@@ -40,7 +41,7 @@
 			<td>
 				<input 
 					class="passinput" 
-					name="pass" 
+					name="pass" id="pass"
 					type="password" 
 					tabindex="2" />
 			</td>
@@ -57,6 +58,11 @@
 				<a href="register.php">register</a>
 			</td>
 		</tr>	
+		<tr>
+			<td>&nbsp;</td>
+			<td colspan="2">
+				<a href="#" onclick="purge();">forget me</a>
+			</td>
+		</tr>	
 	</table>
-</form>	
 <? require('footer.php'); ?>

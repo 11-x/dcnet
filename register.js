@@ -16,22 +16,17 @@ function send_button_clicked(btn)
 
 	var fail=false;
 	
-	if (user.length<2) {
+	if (!is_valid_user(user)) {
 		fail=true;
-		err_user.innerText='at least 2 symbols required';
-	} else if (user.length>32) {
+		alert('Not a valid user: ' + user);
+	} else if (!is_valid_pass(pass)) {
 		fail=true;
-		err_user.innerText='at most 32 symbols allowed';
-	}
-
-	if (pass.length<8) {
-		fail=true;
-		err_pass.innerText='at least 8 symbols required';
+		alert('Not a valid pass');
 	}
 
 	if (pass2!=pass) {
 		fail=true;
-		err_pass2.innerText='passwords differ';
+		alert('Pass confirmation missmatch');
 	}
 
 	if (!email_el.checkValidity()) {
@@ -57,6 +52,8 @@ function send_button_clicked(btn)
 			if (xhr.status==201) {
 				store_user(user, pass);
 				document.location.href='/';
+			} else if (xhr.status==409) {
+				err_user.innerText='user exists';	
 			} else {
 				alert('Something went wrong: ' + xhr.responseText);
 				console.log(xhr);

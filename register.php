@@ -27,10 +27,6 @@
 					id="user" 
 					autocomplete="off"
 					tabindex="1" />
-					
-					<span
-						class="error_msg"
-						id="err_user" />
 			</td>
 		</tr>
 		<tr>
@@ -43,10 +39,6 @@
 					id="pass" 
 					type="password" 
 					tabindex="2" />
-					
-					<span
-						class="error_msg"
-						id="err_pass" />
 			</td>
 		</tr>
 		<tr>
@@ -59,10 +51,6 @@
 					id="pass2" 
 					type="password" 
 					tabindex="3" />
-					
-					<span
-						class="error_msg"
-						id="err_pass2" />
 			</td>
 		</tr>
 		<tr>
@@ -75,10 +63,6 @@
 					type="email" 
 					placeholder="optional"
 					tabindex="4" />
-					
-					<span
-						class="error_msg"
-						id="err_email" />
 			</td>
 		</tr>
 		<tr>
