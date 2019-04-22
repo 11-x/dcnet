@@ -19,7 +19,12 @@
 	}
 ?>
 	</head>
-	<body onload="body_onload(); <?=$onload?>">
+	<body
+		onload="body_onload(); <?=$onload?>"
+		onresize="body_resize();"
+	>
+		<a href="/">home</a>
+		<hr/>
 		<table height="100%" width="100%">
 			<tr valign="center">
 				<td align="center">

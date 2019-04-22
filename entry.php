@@ -48,23 +48,29 @@
 					tabindex="2" />
 			</td>
 		</tr>
-		<tr>
+		<tr class="banner">
 			<td>&nbsp;</td>
 			<td colspan="2">
 				<a href="recover_pass.php">lost pass</a>
 			</td>
 		</tr>
-		<tr>
+		<tr class="banner">
 			<td>&nbsp;</td>
 			<td colspan="2">
 				<a href="register.php">register</a>
 			</td>
 		</tr>	
-		<tr>
+		<tr class="banner">
 			<td>&nbsp;</td>
 			<td colspan="2">
 				<a href="#" onclick="purge();">forget me</a>
 			</td>
 		</tr>	
+		<tr class="banner">
+			<td>&nbsp;</td>
+			<td colspan="2">
+				<a href="/readme.php">README</a>
+			</td>
+		</tr>
 	</table>
 <? require('footer.php'); ?>

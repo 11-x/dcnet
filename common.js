@@ -39,6 +39,7 @@ function body_onload()
 
 	document.getElementById("bottom_spacer").style.height=0.33*
 		document.body.clientHeight;
+	body_resize();
 }
 
 function store_user(user, pass)
@@ -54,4 +55,9 @@ function store_user(user, pass)
 		localStorage.removeItem('pass');
 	}
 	console.log(localStorage);
+}
+
+function body_resize()
+{
+	console.log(window.innerWidth, window.innerHeight);
 }
