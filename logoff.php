@@ -1,7 +1,7 @@
 <?
 	require('common.php');
-	if (is_logged_in()) {
-		unset($_SESSION['user']);
-		redirect('/');
-	}
+	require('users.php');
+
+	logoff_user();
+	redirect('/');
 ?>

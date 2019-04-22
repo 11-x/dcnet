@@ -1,11 +1,20 @@
-function request(method, url, data, cb) {
+var GET='GET';
+var PUT='POST'; // Use POST instead of PUT to increase compatibility
+var POST='POST';
+
+function treq(method, url, data, cb) {
 	var xhr=new XMLHttpRequest();
 	xhr.open(method, url, true);
 	xhr.onreadystatechange=function() {
 		if (this.readyState!=4) return;
 
+		if (this.responseText.indexOf('<b>Parse error</b>')!=-1) {
+			console.error(this.status, this.statusText, this.responseText);
+		} else {
+			console.log(this.status, this.statusText, this.responseText);
+		}
 		if (typeof(cb)!="undefined") {
-			cb(this.status_code, this.responseText);
+			cb(this.status, this.statusText, this.responseText);
 		}
 	}
 	xhr.send(data);
@@ -34,6 +43,15 @@ function body_onload()
 
 function store_user(user, pass)
 {
-	localStorage.setItem('user', user);
-	localStorage.setItem('pass', pass);
+	if (typeof(user)!="undefined") {
+		localStorage.setItem('user', user);
+	} else {
+		localStorage.removeItem('user');
+	}
+	if (typeof(pass)!="undefined") {
+		localStorage.setItem('pass', pass);
+	} else {
+		localStorage.removeItem('pass');
+	}
+	console.log(localStorage);
 }

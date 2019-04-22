@@ -5,15 +5,6 @@ function send_button_clicked(btn)
 	var pass2=document.getElementById("pass2").value;
 	var email_el=document.getElementById("email");
 
-	var err_user=document.getElementById('err_user');
-	err_user.innerText='';
-	var err_pass=document.getElementById('err_pass'); 
-	err_pass.innerText='';
-	var err_pass2=document.getElementById('err_pass2');
-	err_pass2.innerText='';
-	var err_email=document.getElementById('err_email');
-	err_email.innerText='';
-
 	var fail=false;
 	
 	if (!is_valid_user(user)) {
@@ -31,7 +22,6 @@ function send_button_clicked(btn)
 
 	if (!email_el.checkValidity()) {
 		fail=true;
-		err_email.innerText='not a e-mail';
 		email_el.reportValidity();
 	}
 
@@ -53,8 +43,9 @@ function send_button_clicked(btn)
 				store_user(user, pass);
 				document.location.href='/';
 			} else if (xhr.status==409) {
-				err_user.innerText='user exists';	
+				alert('user exists');
 			} else {
+				document.write(xhr.responseText);
 				alert('Something went wrong: ' + xhr.responseText);
 				console.log(xhr);
 			}

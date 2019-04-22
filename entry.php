@@ -1,7 +1,8 @@
 <?
 	require('common.php');
+	require('users.php');
 
-	if (is_logged_in()) {
+	if (get_logged_user()!==NULL) {
 		redirect('/');
 	}
 
@@ -24,6 +25,7 @@
 				<input
 					class="textinput start_focus" 
 					name="user" id="user" 
+					autocapitalize="off"
 					tabindex="1" />
 			</td>
 			<td rowspan="2">

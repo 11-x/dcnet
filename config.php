@@ -1,0 +1,10 @@
+<?php
+
+	const USERS_DB_PATH='users.db';
+
+	const ID_ALPHABETH='0123456789ABCDEF';
+
+	const MAX_ID_GENERATION_ATTEMPTS=100;
+
+	const USER_ID_LENGTH=16;
+?>

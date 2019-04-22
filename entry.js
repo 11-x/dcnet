@@ -10,8 +10,8 @@ function entry_onload()
 		pass_filled=true;
 	}
 
-	if (user_filled && pass_filled)
-		document.getElementById('enter_btn').focus();
+	if (user_filled)
+		document.getElementById('pass').focus();
 }
 
 function purge()
@@ -34,21 +34,39 @@ function login_btn_clicked()
 	} else {
 		btn.disabled=true;
 
-		jget('/getsalt.php?user=' + encodeURIComponent(user),
-				function(salt) {
-			var h=hash(pass, salt);
-			jpost('/login.php', JSON.stringify({
-				user: user,
-				hash: hash(pass, salt),
-				salt: salt
-			}), function(res) {
-				// success
-				store_user(user, pass);
-				window.location.href='/';
-			}, function(code, reason) {
-				alert('login failed: ' + code + ' ' + reason);
+		treq('GET', '/getsalt.php?user=' + encodeURIComponent(user),
+				undefined, function(code, reason, text) {
+			if (code!=200) {
+				alert('Failed to fetch salt: ' + code + ' ' + reason
+					+ '\n' + text);
 				btn.disabled=false;
-			});
+			} else {
+				var salt=JSON.parse(text);
+				var h=hash(pass, salt);
+				console.log('got salt:', salt);
+
+				treq('POST', '/login.php', JSON.stringify({
+					user: user,
+					hash: hash(pass, salt),
+					salt: salt
+				}), function(code, reason, text) {
+					console.log('login result:', code, reason, text);
+					if (code!=200) {
+						alert('login failed: ' + code + ' ' + reason
+							+ '\n' + text);
+						btn.disabled=false;
+					} else {
+						// success
+						store_user(user, pass);
+						window.location.href='/';
+					}
+				});
+			}
 		});
-	}	
+	}
+}
+
+function send_email(addr)
+{
+	document.location.href=('/send.php?addr=' + encodeURIComponent(addr));
 }
