@@ -1,3 +1,17 @@
+function unregister()
+{
+	var btn=document.getElementById('unregister_button');
+	if (typeof(_unregister_button_unlocked)=="undefined") {
+		btn.style.backgroundColor="#d66";
+		_unregister_button_unlocked=null;
+	} else if (confirm('This will permanently delete your access. Sure?')) {
+		store_user();
+		document.location.href='/deluser.php';
+	} else {
+		delete _unregister_button_unlocked;
+		btn.style.backgroundColor="";
+	}
+}
 function send_button_clicked()
 {
 	var user_id=document.getElementById('user_id').value;

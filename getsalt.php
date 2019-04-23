@@ -1,7 +1,7 @@
 <?php
 
-	require('common.php');
-	require('users.php');
+	require_once('common.php');
+	require_once('users.php');
 
 	if (!array_key_exists('user', $_GET)) {
 		respond(400, 'Bad Request');

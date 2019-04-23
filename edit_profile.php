@@ -1,6 +1,6 @@
 <?
-	require('common.php');
-	require('users.php');
+	require_once('common.php');
+	require_once('users.php');
 
 	$user_id=get_logged_user();
 	if (empty($user_id)) {
@@ -93,10 +93,14 @@
 			</td>
 		</tr>
 		<tr>
-			<td>&nbsp;</td>
+			<td align="right">&nbsp;</td>
 			<td>
 				<hr/>
-				<a href="/">home</a>
+				<button
+					tabindex="5"
+					onclick="unregister();"
+					id="unregister_button"
+				>destroy account</button>
 			</td>
 		</tr>
 	</table>

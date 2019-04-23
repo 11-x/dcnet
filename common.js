@@ -40,6 +40,10 @@ function body_onload()
 	document.getElementById("bottom_spacer").style.height=0.33*
 		document.body.clientHeight;
 	body_resize();
+
+	var bt=document.getElementById('bodytable');
+	if (bt.clientWidth>600)
+		bt.style.width=600;
 }
 
 function store_user(user, pass)

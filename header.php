@@ -1,6 +1,17 @@
 <?
+	require_once('users.php');
+
 	if (empty($onload)) {
 		$onload='';
+	}
+
+	$user_id=get_logged_user();
+	if (!empty($user_id)) {
+		$username=get_user_info($user_id)['username'];
+		$user_panel='<a href="/edit_profile.php">' . $username
+			. '</a> <a href="/logoff.php">&#x2348;</a>';
+	} else {
+		$user_panel='&nbsp;';
 	}
 ?>	
 <html>
@@ -23,9 +34,15 @@
 		onload="body_onload(); <?=$onload?>"
 		onresize="body_resize();"
 	>
-		<a href="/">home</a>
-		<hr/>
 		<table height="100%" width="100%">
-			<tr valign="center">
+			<tr valign="top">
 				<td align="center">
-					
+					<table width="100%" id="bodytable"><tr><td align="center">
+		<table width="100%"><tr><td align="left">
+		<a href="/">home</a>
+		</td>
+		<td align="right">
+			<?=$user_panel?>
+		</td>
+		</tr></table>
+		<hr/>

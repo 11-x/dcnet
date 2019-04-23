@@ -1,6 +1,6 @@
 <?
-	require('common.php');
-	require('users.php');
+	require_once('common.php');
+	require_once('users.php');
 
 	$user_id=get_logged_user();
 	

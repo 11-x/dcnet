@@ -1,6 +1,6 @@
 <?
-	require('common.php');
-	require('users.php');
+	require_once('common.php');
+	require_once('users.php');
 
 	if (get_logged_user()!==NULL) {
 		redirect('/');
@@ -26,7 +26,9 @@
 					class="textinput start_focus" 
 					name="user" id="user" 
 					autocapitalize="off"
-					tabindex="1" />
+					tabindex="1" 
+					onkeypress="input_keypressed();"
+					/>
 			</td>
 			<td rowspan="2">
 				<button 
@@ -45,6 +47,7 @@
 					class="passinput" 
 					name="pass" id="pass"
 					type="password" 
+					onkeypress="input_keypressed();"
 					tabindex="2" />
 			</td>
 		</tr>

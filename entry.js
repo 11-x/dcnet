@@ -1,3 +1,9 @@
+function input_keypressed()
+{
+	if (event.key=="Enter") {
+		login_btn_clicked();
+	}
+}
 function entry_onload()
 {
 	var user_filled=false, pass_filled=false;

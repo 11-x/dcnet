@@ -8,9 +8,11 @@
  */
 
 /**
- *	Uses USERS_DB_PATH constant
+ *	Uses constants
  */
-require('config.php');
+require_once('config.php');
+
+require_once('common.php');
 
 error_reporting(E_ALL);
 

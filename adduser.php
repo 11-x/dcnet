@@ -1,6 +1,6 @@
 <?
-	require('common.php');
-	require('users.php');
+	require_once('common.php');
+	require_once('users.php');
 
 	if (get_logged_user()!==NULL) {
 		respond(403, 'Already Logged In');
