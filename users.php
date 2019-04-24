@@ -32,6 +32,11 @@ function get_logged_user()
 	}
 }
 
+function is_logged_in()
+{
+	return !empty(get_logged_user());
+}
+
 /**
  *	Ensure current session is valid
  *

@@ -3,11 +3,11 @@
 	require_once('common.php');
 	require_once('users.php');
 
-	if (!array_key_exists('user', $_GET)) {
+	if (!array_key_exists('username', $_GET)) {
 		respond(400, 'Bad Request');
 	}
 
-	$username =$_GET['user'];
+	$username =$_GET['username'];
 
 	$user_id=get_user_by_username($username);
 

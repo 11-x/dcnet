@@ -9,24 +9,20 @@ if (!empty(get_logged_user())) {
 
 $form=json_decode(file_get_contents('php://input'));
 
-if (empty($form->user) || empty($form->salt) || empty($form->hash))
+if (empty($form->username) || empty($form->pass_hash))
 {
 	respond(400, 'Bad Request');
 }
 
-$user_id=get_user_by_username($form->user);
+$user_id=get_user_by_username($form->username);
 
 if ($user_id===NULL) {
-	respond(404, 'No Such User');
+	respond(403, 'Invalid Credentials');
 }
 
 $info=get_user_info($user_id);
 
-if ($form->salt!=$info['salt']) {
-	respond(400, 'Salt Missmatch');
-}
-
-if ($form->hash!=$info['pass_hash']) {
+if ($form->pass_hash!=$info['pass_hash']) {
 	respond(403, 'Invalid Credentials');
 }
 

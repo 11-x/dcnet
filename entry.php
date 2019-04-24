@@ -1,79 +1,27 @@
 <?
-	require_once('common.php');
-	require_once('users.php');
 
-	if (get_logged_user()!==NULL) {
-		redirect('/');
+	function stylesheet_get($theme, $lang, $page)
+	{
+		return "/themes/$theme/$lang/$page.xsl";
+	}
+	require_once('users.php');
+	
+	if (is_logged_in()) {
+		redirect('/exit.php');
 	}
 
-	$scripts=['entry.js'];
-	$onload='entry_onload();';
-	require('header.php');
+	echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+	echo '<?xml-stylesheet type="text/xsl" href="'
+		. stylesheet_get('daywhite', 'ru', 'entry') . '"?>'."\n";
+	
+	header('Content-Type: text/xml');
 ?>
-	<table>
-		<tr>
-			<td>&nbsp;</td>
-			<td align="left">
-				<div class="title">DCNet entry point</div>
-			</td>
-		</tr>
-		<tr>
-			<td align="right">
-				<span class="label">user:</span>
-			</td>
-			<td>
-				<input
-					class="textinput start_focus" 
-					name="user" id="user" 
-					autocapitalize="off"
-					tabindex="1" 
-					onkeypress="input_keypressed();"
-					/>
-			</td>
-			<td rowspan="2">
-				<button 
-					class="enterbutton" 
-					tabindex="3"
-					onclick="login_btn_clicked();"
-					id="enter_btn">&#x2386;</button>
-			</td>	
-		</tr>
-		<tr>
-			<td align="right">
-				<span class="label">pass:</span>
-			</td>
-			<td>
-				<input 
-					class="passinput" 
-					name="pass" id="pass"
-					type="password" 
-					onkeypress="input_keypressed();"
-					tabindex="2" />
-			</td>
-		</tr>
-		<tr class="banner">
-			<td>&nbsp;</td>
-			<td colspan="2">
-				<a href="recover_pass.php">lost pass</a>
-			</td>
-		</tr>
-		<tr class="banner">
-			<td>&nbsp;</td>
-			<td colspan="2">
-				<a href="register.php">register</a>
-			</td>
-		</tr>	
-		<tr class="banner">
-			<td>&nbsp;</td>
-			<td colspan="2">
-				<a href="#" onclick="purge();">forget me</a>
-			</td>
-		</tr>	
-		<tr class="banner">
-			<td>&nbsp;</td>
-			<td colspan="2">
-				<a href="/readme.php">README</a>
-			</td>
-		</tr>
-	</table>
-<? require('footer.php'); ?>
+<entry>
+	<scripts>
+		<script>/sjcl.js</script>
+		<script>/user.js</script>
+		<script>/cipher.js</script>
+		<script>/common.js</script>
+	</scripts>
+	<readme>/readme.php</readme>
+</entry>
