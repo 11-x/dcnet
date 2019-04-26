@@ -7,7 +7,7 @@
 	}
 	$form=json_decode(file_get_contents('php://input'));
 
-	if (!isset($form->user) || !isset($form->pass_hash)
+	if (!isset($form->username) || !isset($form->pass_hash)
 			|| !isset($form->salt)) {
 		respond(404, 'Bad Request');
 	}
@@ -15,7 +15,7 @@
 	$email=isset($form->email)? $form->email: NULL;
 
 	try {
-		$user_id=add_user($form->user, $form->pass_hash, $form->salt,
+		$user_id=add_user($form->username, $form->pass_hash, $form->salt,
 			$email);
 
 		login_user($user_id);

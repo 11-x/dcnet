@@ -11,7 +11,7 @@
 		<script language="javascript" src="/themes/daywhite/ru/entry.js">
 		</script>
 	</head>
-	<body>
+	<body onload="body_onload();">
 		DCNet: Dreams Cartography Network<br/>
 		Вход<br/>
 		user:<input id="user" /><br/>
@@ -20,7 +20,9 @@
 			id="login_btn"
 			onclick="login_btn_clicked();"
 		>Войти</button><br/>
-		<a href="{/entry/readme}">Что это за место?</a>
+		<a href="{/entry/register}">Зарегистрироваться</a><br/>
+		<a href="{/entry/readme}">Что это за место?</a><br/>
+		<a href="#" onclick="forget()">Забыть меня</a><br/>
 	</body>
 </html>
 </xsl:template>

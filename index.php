@@ -3,7 +3,7 @@
 
 	if (!is_logged_in()) {
 		redirect('entry.php');
+	} else {
+		redirect('home.php');
 	}
-
-	respond(501, 'Not Implemented');
 ?>

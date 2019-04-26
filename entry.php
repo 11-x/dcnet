@@ -1,9 +1,5 @@
 <?
-
-	function stylesheet_get($theme, $lang, $page)
-	{
-		return "/themes/$theme/$lang/$page.xsl";
-	}
+	require_once('themes.php');
 	require_once('users.php');
 	
 	if (is_logged_in()) {
@@ -23,5 +19,6 @@
 		<script>/cipher.js</script>
 		<script>/common.js</script>
 	</scripts>
+	<register>/register.php</register>
 	<readme>/readme.php</readme>
 </entry>

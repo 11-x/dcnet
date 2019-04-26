@@ -18,3 +18,23 @@ function login_btn_clicked()
 	});
 }
 
+function body_onload()
+{
+	var user=document.getElementById("user");
+	var pass=document.getElementById("pass");
+
+	var stored_user=user_get_stored_username();
+	var stored_pass=user_get_stored_pass();
+
+	if (stored_user) {
+		user.value=stored_user;
+	}
+	if (stored_pass) {
+		pass.value=stored_pass;
+	}
+}
+function forget()
+{
+	user_clear_storage();
+	document.location.href=document.location.href;
+}
