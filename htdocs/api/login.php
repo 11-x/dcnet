@@ -1,7 +1,7 @@
 <?
 
-require_once('common.php');
-require_once('users.php');
+require_once('../inc/common.php');
+require_once('../inc/users.php');
 
 if (!empty(get_logged_user())) {
 	redirect("/"); // already logged in, redirect to dashboard

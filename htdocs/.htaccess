@@ -4,5 +4,11 @@ php_flag magic_quotes_gpc 1
 php_value mbstring.http_input auto
 php_value date.timezone America/New_York
 DirectoryIndex index.php index.html index2.html
-ErrorDocument 404 /404.php
+ErrorDocument 404 /err_pages/404.php
+ErrorDocument 403 /err_pages/403.php
+
 AddType text/xsl .xsl
+
+# Disable directory browsing 
+Options -Indexes
+

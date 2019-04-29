@@ -1,6 +1,6 @@
 <?
-	require('themes.php');
-	require('users.php');
+	require('inc/themes.php');
+	require('inc/users.php');
 
 	if (!is_logged_in()) {
 		redirect("/");
@@ -16,10 +16,10 @@
 ?>
 <dream>
 	<scripts>
-		<script>/common.js</script>
-		<script>/user.js</script>
-		<script>/cipher.js</script>
-		<script>/sjcl.js</script>
+		<script>/js/common.js</script>
+		<script>/js/user.js</script>
+		<script>/js/cipher.js</script>
+		<script>/js/sjcl.js</script>
 	</scripts>
 	<username><?=$username?></username>
 	<back>/home.php</back>

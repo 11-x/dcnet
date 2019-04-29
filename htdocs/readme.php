@@ -1,7 +1,7 @@
 <?
 
-	require_once('themes.php');
-	require_once('users.php');
+	require_once('inc/themes.php');
+	require_once('inc/users.php');
 	
 	echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 	echo '<?xml-stylesheet type="text/xsl" href="'

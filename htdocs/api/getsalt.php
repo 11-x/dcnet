@@ -1,7 +1,7 @@
 <?php
 
-	require_once('common.php');
-	require_once('users.php');
+	require_once('../inc/common.php');
+	require_once('../inc/users.php');
 
 	if (!array_key_exists('username', $_GET)) {
 		respond(400, 'Bad Request');

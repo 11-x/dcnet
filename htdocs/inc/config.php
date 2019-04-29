@@ -1,6 +1,7 @@
 <?php
+	define ("HOME", dirname(__FILE__) . "/..");
 
-	const USERS_DB_PATH='users.db';
+	const USERS_DB_PATH=HOME . '/data/users.db';
 
 	const ID_ALPHABETH='0123456789ABCDEF';
 

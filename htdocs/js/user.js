@@ -27,7 +27,8 @@ function user_login(username, pass, cb)
 		return;
 	}
 
-	treq('GET', '/getsalt.php?username=' + encodeURIComponent(username),
+	treq('GET', '/api/getsalt.php?username='
+			+ encodeURIComponent(username),
 			undefined, function(code, reason, text) {
 		if (code!=200) {
 			cb({
@@ -44,7 +45,7 @@ function user_login(username, pass, cb)
 }
 function _user_login_hash(username, pass_hash, pass, cb)
 {
-	treq('POST', '/login.php', JSON.stringify({
+	treq('POST', '/api/login.php', JSON.stringify({
 		username: username,
 		pass_hash: pass_hash
 	}), function(code, reason, text) {
@@ -88,7 +89,7 @@ function user_register(username, pass, pass2, email, cb)
 
 	var salt=gen_salt(64);
 
-	treq('POST', '/adduser.php', JSON.stringify({
+	treq('POST', '/api/adduser.php', JSON.stringify({
 		username: username,
 		salt: salt,
 		pass_hash: hash(pass, salt),
@@ -148,7 +149,7 @@ function user_update(user_id, username, pass, salt, new_pass, new_pass2,
 		return;
 	}
 
-	treq(PUT, '/usermod.php', JSON.stringify({
+	treq(PUT, '/api/usermod.php', JSON.stringify({
 		user_id: user_id,
 		salt: salt,
 		pass_hash: hash(pass, salt),
