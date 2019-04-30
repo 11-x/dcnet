@@ -44,3 +44,25 @@ function dream_update(id, data, cb)
 		}
 	});
 }
+function dream_delete(id, cb)
+{
+	treq(DELETE, '/api/dream_mod.php', JSON.stringify({
+		id: id, data: null
+	}), function(code, reason, text){
+		if (code==204) {
+			if (cb) {
+				cb({
+					success: true,
+					redirect: '/home.php'
+				});
+			}
+		} else {
+			if (cb) {
+				cb({
+					success: false,
+					error_message: code + ' ' + reason + '\n' + text
+				});
+			}
+		}
+	});
+}

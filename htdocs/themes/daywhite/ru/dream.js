@@ -124,3 +124,19 @@ function dream_send()
 		});
 	}
 }
+function dream_delete_clicked()
+{
+	if (confirm('Удалить безвозвратно?')) {
+		var del_btn=document.getElementById('delete_btn');
+		del_btn.disabled=true;
+		var dream_id=document.getElementById('dreamid').value;
+		dream_delete(dream_id, function(res) {
+			if (res['success']) {
+				document.location.href=res['redirect'];
+			} else {
+				alert('Delete failed: ' + res['error_message']);
+				del_btn.disabled=false;
+			}
+		});
+	}
+}

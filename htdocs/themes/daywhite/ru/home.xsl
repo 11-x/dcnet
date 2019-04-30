@@ -14,7 +14,7 @@
 	</head>
 	<body>
 		DCNet: Dreams Cartography Network<br/>
-		Главная (в разработке)<br/>
+		Главная<br/>
 		Привет, <xsl:value-of select="/home/username" />!<br/>
 		<a href="{/home/profile}">Профиль</a><br/>
 		<a href="{/home/adddream}">Добавить сон</a><br/>

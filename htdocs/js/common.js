@@ -1,5 +1,6 @@
 var GET='GET';
 var PUT='POST'; // Use POST instead of PUT to increase compatibility
+var DELETE='POST'; // Use POST instead of DELETE to increase compatibility
 var POST='POST';
 
 function treq(method, url, data, cb) {

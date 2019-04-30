@@ -39,7 +39,11 @@ function dream_update($dream_id, $data)
 		throw new Exception("dream does not exist: $dream_id");
 	}
 
-	$dreams[$dream_id]=$data;
+	if (!empty($data)) {
+		$dreams[$dream_id]=$data;
+	} else {
+		unset($dreams[$dream_id]);
+	}
 
 	_dreams_save($user_id, $dreams);
 
@@ -75,5 +79,38 @@ function dream_get($author, $id)
 
 	$dreams=_dreams_load($author);
 	return $dreams[$id];
+}
+
+function dream_matches_query($dream, $query)
+{
+	if (empty($query))
+		return TRUE;
+
+	foreach (explode(" ", $query) as $token) {
+		if (empty($token))
+			continue;
+
+		if ($token[0]=='+') {
+			if (!in_array(substr($token, 1), $dream['ptags'])
+					|| in_array(substr($token, 1), $dream['ntags'])) {
+				return FALSE;
+			}
+		} elseif ($token[0]=='-') {
+			if (!in_array(substr($token, 1), $dream['ntags'])
+					|| in_array(substr($token, 1), $dream['ptags'])) {
+				return FALSE;
+			}
+		} else {
+			$text=_get($dream['title'], '')
+				. _get($dream['description'], '');
+			if (strpos($text, $token)===FALSE) {
+				_log("TEXT NF: " . json_encode($text) . " in "
+					. json_encode($text));
+				return FALSE;
+			}
+		}
+	}
+
+	return TRUE;
 }
 ?>

@@ -56,4 +56,9 @@ function _gen_id($except)
 
 	throw new Exception('Failed to generate user id');
 }
+
+function _get(&$entity, $default)
+{
+	return isset($entity)? $entity: $default;
+}
 ?>

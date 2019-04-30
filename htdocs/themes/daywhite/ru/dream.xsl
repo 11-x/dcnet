@@ -46,8 +46,12 @@
 		</select>
 		<br/>
 		<button disabled="true">Открыть доступ юзеру/группе</button><br/>
-		<button id="send_btn" onclick="dream_send();">Отправить</button>
+		<button id="send_btn" onclick="dream_send();">Сохранить</button>
 		<button onclick="dream_leave();">Отменить</button>
+		<xsl:if test="/dream/dreamid != ''">
+			<button id="delete_btn"
+			onclick="dream_delete_clicked();">Удалить</button>
+		</xsl:if>
 	</body>
 </html>
 </xsl:template>

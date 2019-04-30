@@ -9,12 +9,22 @@
 		<xsl:for-each select="/dreams/scripts/script">
 			<script language="javascript" src="{.}"></script>
 		</xsl:for-each>
+		<script 
+			language="javascript"
+			src="/themes/daywhite/ru/dreams.js"></script>
 	</head>
-	<body onload="">
+	<body onload="dreams_onload();">
 		<xsl:value-of select="/dreams/username" />
 		&#160;
 		<a href="{/dreams/back}">Назад</a>
 		<hr/>
+		<input
+			id="query"
+			value="{/dreams/query}"
+			onkeypress="query_keypressed();"
+		/>
+		<button onclick="search_btn_clicked()">search</button>
+		<br/>
 		<xsl:for-each select="/dreams/dreams/dream">
 			dream: <a href="/dream.php?id={id}"><xsl:value-of select="title" /></a>
 			<br/>

@@ -18,14 +18,29 @@
 
 	$dreams=_dreams_load($user_id);
 
-	function get_caption($id, $dream)
+	function get_caption($dream)
 	{
-		if (!empty($dream['title'])) {
-			return $dream['title'];
-		} else {
-			return $id;
+		$caption=_get($dream['date'], '');
+		$caption.=' ' . _get($dream['title']);
+		if ($caption==' ') {
+			$caption="(dream)";
 		}
+		return $caption;
 	}
+
+	function cmp_captions($d1, $d2)
+	{
+		if (get_caption($d1) == get_caption($d2))
+			return 0;
+		elseif (get_caption($d1) < get_caption($d2))
+			return -1;
+		else 
+			return 1;
+	}
+
+	$query=!empty($_GET['query'])? $_GET['query']: '';
+
+	//uasort($dreams, "cmp_captions");
 ?>
 <dreams>
 	<scripts>
@@ -37,12 +52,15 @@
 	<dreams>
 		<?
 			foreach ($dreams as $id => $dream) {
-				echo "<dream>\n";
-				echo "\t<id>$id</id>\n";
-				echo "\t<title>" . get_caption($id, $dream)
-					. "</title>\n";
-				echo "</dream>\n";
+				if (dream_matches_query($dream, $query)) {
+					echo "<dream>\n";
+					echo "\t<id>$id</id>\n";
+					echo "\t<title>" . get_caption($dream)
+						. "</title>\n";
+					echo "</dream>\n";
+				}
 			}
 		?>
 	</dreams>
+	<query><?=$query?></query>
 </dreams>
