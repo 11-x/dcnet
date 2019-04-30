@@ -17,6 +17,8 @@
 		Главная (в разработке)<br/>
 		Привет, <xsl:value-of select="/home/username" />!<br/>
 		<a href="{/home/profile}">Профиль</a><br/>
+		<a href="{/home/adddream}">Добавить сон</a><br/>
+		<a href="{/home/querydreams}">Искать сны</a><br/>
 		<a href="{/home/logoff}">Выйти</a><br/>
 
 	</body>

@@ -9,32 +9,40 @@
 
 	echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 	echo '<?xml-stylesheet type="text/xsl" href="'
-		. stylesheet_get('daywhite', 'ru', 'dream') . '"?>'."\n";
+		. stylesheet_get('daywhite', 'ru', 'dreams') . '"?>'."\n";
 	
 	header('Content-Type: text/xml');
 
 	$user_id=get_logged_user();
 	$username=get_user_info($user_id)['username'];
 
-	if (!empty($_GET['id'])) {
-		$dream_id=$_GET['id'];
-		$author_id=!empty($_GET['author'])? $_GET['author']: $user_id;
-		$dream_data=dream_get($author_id, $dream_id);
-	} else {
-		$dream_data=(object)array();
-		$dream_id_xml="";
-		$dream_id='';
-	}
+	$dreams=_dreams_load($user_id);
 
-	$dream_data=htmlspecialchars(json_encode($dream_data));
+	function get_caption($id, $dream)
+	{
+		if (!empty($dream['title'])) {
+			return $dream['title'];
+		} else {
+			return $id;
+		}
+	}
 ?>
-<dream>
+<dreams>
 	<scripts>
 		<script>/js/common.js</script>
 		<script>/js/dream.js</script>
 	</scripts>
 	<username><?=$username?></username>
 	<back>/home.php</back>
-	<dreamdata><?=$dream_data?></dreamdata>
-	<dreamid><?=$dream_id?></dreamid>
-</dream>
+	<dreams>
+		<?
+			foreach ($dreams as $id => $dream) {
+				echo "<dream>\n";
+				echo "\t<id>$id</id>\n";
+				echo "\t<title>" . get_caption($id, $dream)
+					. "</title>\n";
+				echo "</dream>\n";
+			}
+		?>
+	</dreams>
+</dreams>

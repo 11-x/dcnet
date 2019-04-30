@@ -135,7 +135,7 @@ function add_user($username, $pass_hash, $salt, $email = NULL)
 			return NULL;
 		}
 
-		$user_id=_gen_user_id($users);
+		$user_id=_gen_id($users);
 
 		$users[$user_id]=array(
 			'username' => $username,
@@ -221,22 +221,6 @@ function get_user_by_username($username)
 	}
 
 	return NULL;
-}
-function _gen_user_id($users)
-{
-	$len=strlen(ID_ALPHABETH);
-
-	for ($i=0; $i<MAX_ID_GENERATION_ATTEMPTS; $i++) {
-		$user_id='';
-		for ($j=0; $j<USER_ID_LENGTH; $j++) {
-			$user_id .= ID_ALPHABETH[rand(0, $len-1)];
-		}
-		if (!array_key_exists($user_id, $users)) {
-			return $user_id;
-		}
-	}
-
-	throw new Exception('Failed to generate user id');
 }
 function get_user_info($user_id)
 {
