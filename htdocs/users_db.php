@@ -1,20 +1,6 @@
 <?php
-/**
- *	User session routines module
- *
- *	Uses $_SESSION['logged_in_user_id'] to store id of current user
- *	
- *	@package users
- */
-
-/**
- *	Uses constants
- */
-require_once('config.php');
 
 require_once('common.php');
-
-error_reporting(E_ALL);
 
 /**
  *	Get id of user currently logged in
@@ -82,7 +68,7 @@ function _users_load()
 	if (!file_exists(USERS_DB_PATH)) {
 		return array();
 	} else {
-		return json_decode(file_get_contents(USERS_DB_PATH), TRUE);
+		return json_loads(file_get_contents(USERS_DB_PATH));
 	}
 }
 
@@ -122,7 +108,7 @@ function is_valid_username($s)
 function add_user($username, $pass_hash, $salt, $email = NULL)
 {
 	if (!is_valid_username($username)) {
-		throw new Exception('Invalid username: ' + $username);
+		throw new Exception('Invalid username: ' . $username);
 	}
 
 	_users_lock();
@@ -131,8 +117,8 @@ function add_user($username, $pass_hash, $salt, $email = NULL)
 
 		$user_id = get_user_by_username($username);
 
-		if (!empty($userid)) {
-			return NULL;
+		if (!empty($user_id)) {
+			throw new Exception('Username exists: ' . $username);
 		}
 
 		$user_id=_gen_id($users);

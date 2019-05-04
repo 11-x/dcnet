@@ -1,3 +1,300 @@
+var dcn=new function(){
+
+	//
+	// API
+	//
+
+	/// Check if current state is 'logged in'
+	/// cb(status) will be invoked, where status is:
+	///	- true (is logged in)
+	/// - false (is not logged in)
+	/// - undefined (an error has occured)
+	this.check_logged_in=function(cb){};
+
+	/// Try to login with given username/pass
+	///	cb_ok()
+	/// cb_err(error_msg, error_code)
+	this.login=function(username, pass, cb_ok, cb_err) {};
+
+	/// End current session
+	/// Callback is invoked after it is done
+	this.logoff=function(cb_ok, cb_err) {};
+
+	/// Try to login with given username/pass
+	///	cb_ok()
+	/// cb_err(error_msg, error_code)
+	this.register=function(username, pass, email, cb_ok, cb_err) {};
+
+
+	/// Update given fields of profile
+	/// Allowed fields: pass_hash, email
+	this.update_profile=function(items, cb_ok, cb_err) {};
+
+	/// Get current username/pass saved in browser (may or may not
+	/// be logged in)
+	this.get_username=function() { return localStorage['username']; };
+	this.get_pass=function() { return localStorage['pass']; };
+	this.get_email=function(){};
+
+	/// Clear all user data from browser's local storage
+	this.purge=function() {};
+
+	//
+	// Implementation
+	//
+
+	this._request=function(method, url, data, cb)
+	{
+		var xhr=new XMLHttpRequest();
+		xhr.open(method, url, true);
+		xhr.onreadystatechange=function() {
+			if (this.readyState!=4) return;
+
+			if (this.responseText.indexOf('<b>Parse error</b>')!=-1) {
+				console.error(this.status, this.statusText, this.responseText);
+			} else {
+				console.log(this.status, this.statusText, this.responseText);
+			}
+			if (typeof(cb)!="undefined") {
+				cb(this.status, this.statusText, this.responseText);
+			}
+		}
+		xhr.send(data);
+	};
+
+	this._get=function(url, cb) {
+		this._request('GET', url, undefined, cb);
+	};
+
+	this._post=function(url, data, cb) {
+		this._request('POST', url, data, cb);
+	};
+
+	this._put=function(url, data, cb) {
+		this._post(url, data, cb); // use POST instead of PUT
+	};
+
+	this._delete=function(url, cb) {
+		this._get(url, cb); // use GET instead of DELETE
+	};
+
+	this.check_logged_in=function(cb) {
+		if (!cb) return;
+
+		this._get('/users.php?cmd=get_user_info',
+			function(code, reason, data)
+		{
+			if (code==200 && data) {
+				localStorage['info']=data;
+				cb(true);
+			} else if (code==204) {
+				cb(false);
+			} else {
+				cb(undefined);
+			}
+		});
+	};
+
+	this.login=function(username, pass, cb_ok, cb_err) {
+		var self=this;
+		this._post('/users.php', JSON.stringify({
+			cmd: 'get_salt',
+			username: username
+		}), function(code, reason, data) {
+			if (code!=200) {
+				cb_err('Salt fetch failed: ' + reason + '\n' + data);
+			} else {
+				var salt=JSON.parse(data);
+				self._post('/users.php', JSON.stringify({
+					cmd: 'login',
+					username: username,
+					pass_hash: self._hash(pass+salt)
+				}), function(code, reason, data) {
+					if (code==200) {
+						localStorage['username']=username;
+						localStorage['pass']=pass;
+						localStorage['info']=data;
+						cb_ok();
+					} else {
+						cb_err(reason + '\n' + data);
+					}
+				});
+			}
+		});
+	};
+
+	this.logoff=function(cb_ok, cb_err) {
+		this._delete('/users.php?cmd=logoff', function(code, reason, data) {
+			if (code!=204)
+				cb_err(code + ' ' + reason + '\n' + data);
+			else 
+				cb_ok();
+		});
+	};
+
+	this.register=function(username, pass, email, cb_ok, cb_err) {
+		var pass_err=this._validate_pass(pass);
+		if (pass_err) {
+			cb_err(pass_err);
+			return;
+		}
+
+		var salt=this._gen_salt();
+
+		this._post('/users.php', JSON.stringify({
+			'cmd': 'register',
+			'username': username,
+			'salt': salt,
+			'pass_hash': this._hash(pass+salt),
+			'email': email
+		}), function(code, reason, data) {
+			if (code==201) {
+				cb_ok();
+			} else if (code==403) {
+				cb_err(data);
+			} else {
+				console.error('Unexpected error', code, reason, data);
+				cb_err('Unexpected error: ' + code + ' ' + reason + '\n'
+					+ data);
+			}
+		});
+	};
+
+	this.update_profile=function(items, cb_ok, cb_err) {
+		if ('pass' in items) {
+			var salt=dcn._gen_salt();
+			items['pass_hash']=dcn._hash(items['pass']+salt);
+			delete items['pass'];
+			items['salt']=salt;
+		}
+		this._put('/users.php', JSON.stringify({
+			cmd: 'update_profile',
+			items: items
+		}), function(code, reason, data)
+		{
+			console.log(code, reason, data);
+			if (code==200) {
+				localStorage['info']=data;
+				cb_ok();
+			} else {
+				cb_err(code + ' ' + reason + '\n' + data);
+			}
+		});
+	};
+
+	this.get_email=function(){
+		if ('info' in localStorage)
+			return JSON.parse(localStorage['info'])['email'];
+	}
+
+	this.purge=function() {
+		localStorage.clear();
+	};
+
+	this._gen_salt=function(length) {
+		if (typeof(length)=="undefined") {
+			length=32;
+		}
+		var text = "";
+		var alphabeth = "abcdef0123456789";
+			
+		for (var i = 0; i < length; i++) {
+			text += alphabeth.charAt(Math.floor(Math.random()
+				* alphabeth.length));
+		}
+		
+		return text;
+	}
+
+	this._hash=function(data, salt) {
+		var hasher=new sjcl.hash.sha256();
+		hasher.update(data+salt);
+
+		var arr_hash=hasher.finalize();
+
+		var result='';
+
+		for (var i=0; i<arr_hash.length; i++) {
+			// >>> to make positive
+			var hex='00000000' + (arr_hash[i] >>> 0).toString(16);
+			result+=hex.slice(-8);
+		}
+
+		return result;
+	}
+
+	this._validate_pass=function(pass) {
+		if (pass.length<8) {
+			return 'Password too short (at least 8 symbols required)';
+		}
+		// Todo check password strength
+	};
+}();
+
+/*
+// The following code is taken from:
+// https://crypto.stanford.edu/sjcl/
+// https://github.com/bitwiseshiftleft/sjcl
+//
+SJCL is open. You can use, modify and redistribute it under a BSD
+license or under the GNU GPL, version 2.0.
+
+---------------------------------------------------------------------
+
+http://opensource.org/licenses/BSD-2-Clause
+
+Copyright (c) 2009-2015, Emily Stark, Mike Hamburg and Dan Boneh at
+Stanford University. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+---------------------------------------------------------------------
+
+http://opensource.org/licenses/GPL-2.0
+
+The Stanford Javascript Crypto Library (hosted here on GitHub) is a
+project by the Stanford Computer Security Lab to build a secure,
+powerful, fast, small, easy-to-use, cross-browser library for
+cryptography in Javascript.
+
+Copyright (c) 2009-2015, Emily Stark, Mike Hamburg and Dan Boneh at
+Stanford University.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 "use strict";var sjcl={cipher:{},hash:{},keyexchange:{},mode:{},misc:{},codec:{},exception:{corrupt:function(a){this.toString=function(){return"CORRUPT: "+this.message};this.message=a},invalid:function(a){this.toString=function(){return"INVALID: "+this.message};this.message=a},bug:function(a){this.toString=function(){return"BUG: "+this.message};this.message=a},notReady:function(a){this.toString=function(){return"NOT READY: "+this.message};this.message=a}}};
 sjcl.cipher.aes=function(a){this.s[0][0][0]||this.O();var b,c,d,e,f=this.s[0][4],g=this.s[1];b=a.length;var h=1;if(4!==b&&6!==b&&8!==b)throw new sjcl.exception.invalid("invalid aes key size");this.b=[d=a.slice(0),e=[]];for(a=b;a<4*b+28;a++){c=d[a-1];if(0===a%b||8===b&&4===a%b)c=f[c>>>24]<<24^f[c>>16&255]<<16^f[c>>8&255]<<8^f[c&255],0===a%b&&(c=c<<8^c>>>24^h<<24,h=h<<1^283*(h>>7));d[a]=d[a-b]^c}for(b=0;a;b++,a--)c=d[b&3?a:a-4],e[b]=4>=a||4>b?c:g[0][f[c>>>24]]^g[1][f[c>>16&255]]^g[2][f[c>>8&255]]^g[3][f[c&
 255]]};
