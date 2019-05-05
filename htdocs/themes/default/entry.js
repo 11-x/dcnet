@@ -19,6 +19,8 @@ function body_onload()
 
 function login_btn_clicked()
 {
+	var btn=document.getElementById('login_btn');
+	btn.disabled=true;
 	dcn.login(
 		document.getElementById('username').value,
 		document.getElementById('pass').value,
@@ -27,6 +29,7 @@ function login_btn_clicked()
 		},
 		function(err_msg) {
 			alert('login failed: ' + err_msg);
+			btn.disabled=false;
 		}
 	);
 }

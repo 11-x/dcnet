@@ -1,12 +1,7 @@
 <?
 	require_once('common.php');
 	require_once('users_db.php');
-
-	function _err_handler($errno, $errstr, $errfile, $errline, $errctx)
-	{
-		throw new Exception("ERROR ($errno): $errstr "
-			. "in $errfile at $errline");
-	}
+	header('Access-Control-Allow-Origin: *');
 
 	function get_salt($username)
 	{
@@ -38,6 +33,7 @@
 
 		$_SESSION['logged_in_user_id']=$user_id;
 
+		$info['user_id']=$user_id;
 		respond_json(200, 'Logged In', $info);
 	}
 
@@ -62,7 +58,9 @@
 		}
 
 		update_user_info($user_id, $items);
-		respond_json(200, "Modified", get_user_info($user_id));
+		$info=get_user_info($user_id);
+		$info['user_id']=$user_id;
+		respond_json(200, "Modified", $info);
 	}
 
 	try {
@@ -77,8 +75,9 @@
 				case "get_user_info":
 					$user_id=get_logged_user();
 					if (!empty($user_id)) {
-						respond_json(200, 'Logged In',
-							get_user_info($user_id));
+						$info=get_user_info($user_id);
+						$info['user_id']=$user_id;
+						respond_json(200, 'Logged In', $info);
 					} else {
 						respond(204, 'Not Logged In');
 					}

@@ -8,3 +8,9 @@ function logoff_btn_clicked(btn)
 		btn.disabled=false;
 	});
 }
+
+function new_dream()
+{
+	delete localStorage['dream_id'];
+	location="dream.html";
+}

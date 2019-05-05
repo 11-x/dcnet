@@ -13,7 +13,25 @@ const MAX_ID_GENERATION_ATTEMPTS=100;
 
 const USER_ID_LENGTH=16;
 
+const DREAMS_DIR='dreams/';
+
+const LOG_PATH='common.log';
+
 session_start();
+
+function _log($what)
+{
+	file_put_contents(LOG_PATH, $what . "\n", FILE_APPEND);
+}
+
+/**
+ * Common error hander, which just throws an Exception
+ */
+function _err_handler($errno, $errstr, $errfile, $errline, $errctx)
+{
+	throw new Exception("ERROR ($errno): $errstr "
+		. "in $errfile at $errline");
+}
 
 /**
  *	Redirect and terminate

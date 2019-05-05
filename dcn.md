@@ -5,11 +5,14 @@
 -   [dcn][1]
 -   [get_username][2]
 -   [get_pass][3]
--   [\_request][4]
-    -   [Parameters][5]
--   [check_logged_in_callback][6]
--   [check_logged_in][7]
-    -   [Parameters][8]
+    -   [Parameters][4]
+-   [\_request][5]
+    -   [Parameters][6]
+-   [check_logged_in_callback][7]
+-   [check_logged_in][8]
+    -   [Parameters][9]
+-   [dream_add][10]
+    -   [Parameters][11]
 
 ## dcn
 
@@ -19,14 +22,20 @@ The main object to access DCNet JS API.
 
 Get current user's username (from local storage)
 
-Returns **([String][9] \| [undefined][10])** username or undefined if no username
+Returns **([String][12] \| [undefined][13])** username or undefined if no username
 is stored.
 
 ## get_pass
 
 Get current user's pass (from local storage)
 
-Returns **([String][9] \| [undefined][10])** username or undefined if no pass is
+If userid is undefined, current user's pass is returned
+
+### Parameters
+
+-   `user_id`  
+
+Returns **([String][12] \| [undefined][13])** username or undefined if no pass is
 stored.
 
 ## \_request
@@ -46,7 +55,7 @@ Perform ajax request
 
 Callback for check_logged_in
 
-Type: [Function][11]
+Type: [Function][14]
 
 ## check_logged_in
 
@@ -56,24 +65,65 @@ Check if session is in 'logged in' state
 
 -   `cb`  {check_logged_in_callback}
 
+## dream_add
+
+Create new dream
+
+Data is provided as an object in the following format:
+
+{
+'date': 'YYYY-MM-DD',
+'title': '<some text>',
+'description': '<some text>',
+'tags': ["+ptag", "?qtag", "-ntag", ...],
+'.protected': { "group/user id": { <fields> }... }
+'bubbles': [ {
+	'<bubble fields>': ...,
+	'.protected': { "group/user id": { <fields> }... }
+}... ]
+}
+
+Protected data must not be different from public data, it may
+define missing fields (e.g. 'title') or add more tags.
+Tags (either public, protected or mixed) must not conflict with
+each other (e.g. have +tag and -tag together).
+
+All protected data will be encrypted (corresponding password
+must be present in localStorage).
+
+Calls cb_ok(dream_id, dream_data) on success and cb_err(msg)
+	on error.
+
+### Parameters
+
+-   `data`  
+-   `cb_ok`  
+-   `cb_err`  
+
 [1]: #dcn
 
 [2]: #get_username
 
 [3]: #get_pass
 
-[4]: #_request
+[4]: #parameters
 
-[5]: #parameters
+[5]: #_request
 
-[6]: #check_logged_in_callback
+[6]: #parameters-1
 
-[7]: #check_logged_in
+[7]: #check_logged_in_callback
 
-[8]: #parameters-1
+[8]: #check_logged_in
 
-[9]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[9]: #parameters-2
 
-[10]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined
+[10]: #dream_add
 
-[11]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+[11]: #parameters-3
+
+[12]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+
+[13]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined
+
+[14]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function

@@ -38,11 +38,34 @@ var dcn=new function(){
 
 	/**
 	 * Get current user's pass (from local storage)
+	 *
+	 * If userid is undefined, current user's pass is returned
 	 * @returns {String|undefined} username or undefined if no pass is
 	 * stored.
 	 */
-	this.get_pass=function() { return localStorage['pass']; };
-	this.get_email=function(){};
+	this.get_pass=function(user_id) {
+		if (typeof(user_id)=="undefined" || user_id==this.get_user_id()) {
+			return localStorage['pass'];
+		} else {
+			if (!'info' in localStorage) {
+				throw "No info in localStorage";
+			}
+
+			var info=JSON.parse(localStorage['info']);
+
+			if (!'.passwords' in info) {
+				throw "No such key";
+			}
+
+			var passwords=sjcl.decode(this.get_pass(), info['.passwords']);
+
+			if (!key in passwords) {
+				throw "No such key";
+			}
+
+			return passwords[key];
+		}
+	};
 
 	/// Clear all user data from browser's local storage
 	this.purge=function() {};
@@ -61,6 +84,11 @@ var dcn=new function(){
 	 */
 	this._request=function(method, url, data, cb)
 	{
+		if (typeof(localStorage['.node'])!="undefined"
+				&& !new RegExp('^(?:[a-z]+:)?//', 'i').test(url)
+				&& url.indexOf('/')===0)
+			url=localStorage['.node'] + url; // rebase
+
 		var xhr=new XMLHttpRequest();
 		xhr.open(method, url, true);
 		xhr.onreadystatechange=function() {
@@ -195,7 +223,18 @@ var dcn=new function(){
 	};
 
 	this.update_profile=function(items, cb_ok, cb_err) {
-		if ('pass' in items) {
+		var pass_flag='pass' in items;
+		var pass=undefined;
+		if (pass_flag) {
+			cb_err('Pass change not implemented');
+			// Need to recrypt all crypted data
+			return;
+			pass=items.pass;
+			var pass_err=this._validate_pass(pass);
+			if (pass_err) {
+				cb_err(pass_err);
+				return;
+			}
 			var salt=dcn._gen_salt();
 			items['pass_hash']=dcn._hash(items['pass']+salt);
 			delete items['pass'];
@@ -209,6 +248,8 @@ var dcn=new function(){
 			console.log(code, reason, data);
 			if (code==200) {
 				localStorage['info']=data;
+				if (pass)
+					localStorage['pass']=pass;
 				cb_ok();
 			} else {
 				cb_err(code + ' ' + reason + '\n' + data);
@@ -216,10 +257,15 @@ var dcn=new function(){
 		});
 	};
 
+	this.get_user_id=function() {
+		if ('info' in localStorage)
+			return JSON.parse(localStorage['info'])['user_id'];
+	};
+
 	this.get_email=function(){
 		if ('info' in localStorage)
 			return JSON.parse(localStorage['info'])['email'];
-	}
+	};
 
 	this.purge=function() {
 		localStorage.clear();
@@ -263,6 +309,192 @@ var dcn=new function(){
 		}
 		// Todo check password strength
 	};
+
+	/**
+	 * Create new dream
+	 *
+	 * Data is provided as an object in the following format:
+	 *
+	 * {
+	 *	'date': 'YYYY-MM-DD',
+	 *	'title': '<some text>',
+	 *	'description': '<some text>',
+	 *	'tags': ["+ptag", "?qtag", "-ntag", ...],
+	 *	'.protected': { "group/user id": { <fields> }... }
+	 *	'bubbles': [ {
+	 *		'<bubble fields>': ...,
+	 *		'.protected': { "group/user id": { <fields> }... }
+	 *	}... ]
+	 * }
+	 *
+	 *	Protected data must not be different from public data, it may
+	 *	define missing fields (e.g. 'title') or add more tags.
+	 *	Tags (either public, protected or mixed) must not conflict with
+	 *	each other (e.g. have +tag and -tag together).
+	 *
+	 *	All protected data will be encrypted (corresponding password
+	 *	must be present in localStorage).
+	 *
+	 *	Calls cb_ok(dream_id, dream_data) on success and cb_err(msg)
+	 * 	on error.
+	 */
+	this.dream_add=function(data, cb_ok, cb_err) {
+		// TODO: add try/catch block for errors during protecting
+		var data2=JSON.parse(JSON.stringify(data));
+		if ('.protected' in data2)
+			data2['.protected']=this._protect(data2['.protected']);
+		
+		if ('bubbles' in data2)
+			for (var i=0; i<data2['bubbles'].length; i++) {
+				if ('.protected' in data2['bubbles'][i])
+					data2.bubbles[i]['.protected']
+						=this._protect(data2.bubbles[i]['.protected']);
+			}
+		
+		// Now data2 is ready to be sent to server
+
+		this._post('/dreams.php', JSON.stringify({
+			cmd: 'add',
+			data: data2
+		}), function(code, reason, data) {
+			if (code==201) {
+				var id=data;
+				cb_ok(id, data2);
+			} else {
+				cb_err(code + ' ' + reason + '\n' + data);
+			}
+		});
+	};
+
+	this.dream_update=function(dream_id, data, cb_ok, cb_err) {
+		// TODO: add try/catch block for errors during protecting
+		var data2=JSON.parse(JSON.stringify(data));
+		if ('.protected' in data2)
+			data2['.protected']=this._protect(data2['.protected']);
+		
+		if ('bubbles' in data2)
+			for (var i=0; i<data2['bubbles'].length; i++) {
+				if ('.protected' in data2['bubbles'][i])
+					data2.bubbles[i]['.protected']
+						=this._protect(data2.bubbles[i]['.protected']);
+			}
+		
+		// Now data2 is ready to be sent to server
+
+		this._post('/dreams.php', JSON.stringify({
+			cmd: 'update',
+			dream_id: dream_id,
+			data: data2
+		}), function(code, reason, data) {
+			if (code==204) {
+				cb_ok();
+			} else {
+				cb_err(code + ' ' + reason + '\n' + data);
+			}
+		});
+	};
+
+	this._protect=function(dict) {
+		var res={};
+		for (var key in dict) {
+			var pass=this.get_pass(key);
+			res[key]=sjcl.encrypt(pass, JSON.stringify(dict[key]));
+			console.log(key, "//", dict[key], "//", res[key]);
+		}
+		return res;
+	};
+
+	this._unprotect=function(dict) {
+		var res={};
+		for (var key in dict) {
+			var pass=this.get_pass(key);
+			res[key]=JSON.parse(sjcl.decrypt(pass, dict[key]));
+			console.log(key, "//", dict[key], "//", res[key]);
+		}
+		console.log("RES", res);
+		return res;
+	}
+
+	this.get_user_dreams=function(user_id, cb_ok, cb_err) {
+		if (!user_id)
+			user_id=this.get_user_id();
+
+		var self=this;
+
+		this._get('/dreams.php?cmd=fetch&user_id='
+			+ encodeURIComponent(user_id), function(code, reason, data)
+		{
+			if (code==200) {
+				var dreams=JSON.parse(data);
+				var res={};
+				for (var dream_id in dreams) {
+					res[dream_id]=dreams[dream_id];
+					if ('.protected' in dreams[dream_id]) {
+						res[dream_id]['.protected']
+							=self._unprotect(res[dream_id]['.protected']);
+					}
+					if ('bubbles' in dreams[dream_id]) {
+						for (var i=0; i<dreams[dream_id]['bubbles'].length;
+								i++) {
+							var bubble=dreams[dream_id]['bubbles'][i];
+							if ('.protected' in bubble) {
+								res[dream_id].bubbles[i]['.protected']
+									=self._unprotect(bubble['.protected']);
+							}
+						}
+					}
+				}
+				cb_ok(res);
+			} else {
+				cb_err(code + ' ' + reason + '\n' + data);
+			}
+		});
+	}
+
+	this.get_dream_by_id=function(dream_id, cb_ok, cb_err) {
+		var user_id=this.get_user_id();
+		var self=this;
+
+		this._get('/dreams.php?cmd=fetch&user_id='
+			+ encodeURIComponent(user_id) + '&dream_id='
+			+ encodeURIComponent(dream_id), function(code, reason, data)
+		{
+			if (code==200) {
+				var dream=JSON.parse(data);
+				if ('.protected' in dream) {
+					dream['.protected']
+						=self._unprotect(dream['.protected']);
+				}
+				if ('bubbles' in dream) {
+					for (var i=0; i<dream['bubbles'].length; i++) {
+						var bubble=dream['bubbles'][i];
+						if ('.protected' in bubble) {
+							dream.bubbles[i]['.protected']
+								=self._unprotect(bubble['.protected']);
+						}
+					}
+				}
+				cb_ok(dream);
+			} else {
+				cb_err(code + ' ' + reason + '\n' + data);
+			}
+		});
+	};
+
+	this.dream_get=function(dream, field)
+	{
+		if (field in dream) {
+			return dream[field];
+		}
+		if ('.protected' in dream) {
+			for (var key in dream['.protected']) {
+				if (field in dream['.protected'][key]) {
+					return dream['.protected'][key][field];
+				}
+			}
+		}
+	}
+
 }();
 
 /*
