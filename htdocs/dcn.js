@@ -1,15 +1,11 @@
+/**
+ * The main object to access DCNet JS API.
+ */
 var dcn=new function(){
 
 	//
 	// API
 	//
-
-	/// Check if current state is 'logged in'
-	/// cb(status) will be invoked, where status is:
-	///	- true (is logged in)
-	/// - false (is not logged in)
-	/// - undefined (an error has occured)
-	this.check_logged_in=function(cb){};
 
 	/// Try to login with given username/pass
 	///	cb_ok()
@@ -32,7 +28,19 @@ var dcn=new function(){
 
 	/// Get current username/pass saved in browser (may or may not
 	/// be logged in)
+
+	/**
+	 * Get current user's username (from local storage)
+	 * @returns {String|undefined} username or undefined if no username
+	 *	is stored.
+	 */
 	this.get_username=function() { return localStorage['username']; };
+
+	/**
+	 * Get current user's pass (from local storage)
+	 * @returns {String|undefined} username or undefined if no pass is
+	 * stored.
+	 */
 	this.get_pass=function() { return localStorage['pass']; };
 	this.get_email=function(){};
 
@@ -43,6 +51,14 @@ var dcn=new function(){
 	// Implementation
 	//
 
+	/**
+	 * Perform ajax request
+	 * @param method {String} HTTP method ("GET", "POST",
+	 *	"PUT", "DELETE", etc.)
+	 * @param url {String} Relative or absolute URL to fetch
+	 * @param data {var|undefined} A variable passed to XMLHttprequest's
+	 *	send method or undefined
+	 */
 	this._request=function(method, url, data, cb)
 	{
 		var xhr=new XMLHttpRequest();
@@ -78,6 +94,24 @@ var dcn=new function(){
 		this._get(url, cb); // use GET instead of DELETE
 	};
 
+	/// Check if current state is 'logged in'
+	/// cb(status) will be invoked, where status is:
+	///	- true (is logged in)
+	/// - false (is not logged in)
+	/// - undefined (an error has occured)
+	this.check_logged_in=function(cb){};
+
+	/**
+	 * Callback for check_logged_in
+	 *
+	 * @callback check_logged_in_callback
+	 * @param {Boolean|undefined}
+	 */
+
+	/**
+	 * Check if session is in 'logged in' state
+	 * @param cb {check_logged_in_callback}
+	 */
 	this.check_logged_in=function(cb) {
 		if (!cb) return;
 
