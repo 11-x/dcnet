@@ -1,0 +1,29 @@
+<html>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="Content-Type"
+		content="text/html;charset=UTF-8" />
+	<head>
+		<title>DCNet &#8212; Регистрация</title>
+		<script src="../../dcn.js"></script>
+		<script src="register.js"></script>
+		<script src="plain.js"></script>
+		<link rel="stylesheet" type="text/css" href="white.css" />
+	</head>
+	<body onload="arrange('body_content', 100);">
+		<div id="body_content">
+			<p><a href="/" class="logo">DCNet</a>: Регистрация</p>
+			<p><input id="user" placeholder="username"
+				autocomplete="off" autocapitalize="off"
+				/></p>
+			<p><input id="pass" type="password"
+				placeholder="pass"/></p>
+			<p><input id="pass2" type="password"
+				placeholder="confirm pass"/></p>
+			<p><button
+				id="register_btn"
+				onclick="register_btn_clicked();"
+			>Зарегистрироваться</button></p>
+			<a href="/">Отменить</a>
+		</div>
+	</body>
+</html>

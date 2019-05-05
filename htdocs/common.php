@@ -3,7 +3,7 @@
 /**
  *	Default theme
  */
-const DEFAULT_THEME='default';
+const DEFAULT_THEME='plain';
 
 const USERS_DB_PATH='users.json';
 

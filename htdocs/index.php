@@ -9,5 +9,5 @@
 	if (!theme_exists($theme))
 		fatal_error("Failed to load theme: $theme");
 	
-	redirect("/themes/default/gate.html");
+	redirect("/themes/$theme/gate.html");
 ?>

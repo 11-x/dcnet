@@ -1,0 +1,55 @@
+<html>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="Content-Type"
+		content="text/html;charset=UTF-8" />
+	<head>
+		<title>DCNet &#8212; Сон</title>
+		<script src="../../dcn.js"></script>
+		<script src="dream.js"></script>
+		<script src="plain.js"></script>
+		<link rel="stylesheet" type="text/css" href="white.css" />
+	</head>
+	<body onload="dream_onload();">
+		<div id="body_content">
+			<a href="/" class="logo">DCNet</a>: Сон<br/>
+			<p><input id="date" type="date"/></p>
+			<p><input id="title" placeholder="title" 
+				style="width: 100%"/></p>
+			<p><textarea
+				id="description"
+				style="width: 100%; height: 200"
+				placeholder="description"></textarea></p>
+			<p><span id="tags"></span>
+			<input
+				id="tag" placeholder="tag" 
+				style="width: 100;"
+			/><button
+				onclick="add_tag('ptags');"
+			>+</button><button
+				onclick="add_tag('qtags');"
+			>?</button><button
+				onclick="add_tag('ntags');"
+			>&#x2212;</button>
+			</p>
+			<p><button disabled="true"
+				style="width: 100%"
+			>Добавить схему</button></p>
+			<hr/>
+			<p><button disabled="true"
+				style="width: 100%"
+			>Добавить пузырь</button></p>
+			<hr/>
+			<p>Уровень доступа: <select id="access">
+				<option id="public">доступно всем</option>
+				<option id="private">приватно</option>
+			</select>
+			</p>
+			<p><button disabled="true">
+				Открыть доступ юзеру/группе
+			</button></p>
+			<p><button id="send_btn"
+				onclick="send_btn_clicked();">Сохранить</button>
+			<button onclick="history.back();">Назад</button></p>
+		</div>
+	</body>
+</html>

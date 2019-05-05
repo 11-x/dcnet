@@ -1,5 +1,7 @@
 function body_onload()
 {
+	arrange('body_content', 200);
+
 	if (dcn.get_username())
 		document.getElementById('username').innerText=dcn.get_username();
 	

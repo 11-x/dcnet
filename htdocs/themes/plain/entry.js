@@ -1,5 +1,7 @@
 function body_onload()
 {
+	arrange('body_content', 200);
+
 	var el_username=document.getElementById('username');
 	var el_pass=document.getElementById('pass');
 
@@ -15,6 +17,12 @@ function body_onload()
 		if (el_username.value)
 			document.getElementById('login_btn').focus();
 	}
+
+	dcn.check_logged_in(function(status) {
+		if (status) {
+			location="/";
+		}
+	});
 }
 
 function login_btn_clicked()

@@ -1,5 +1,6 @@
 function body_onload()
 {
+	arrange('body_content', 600);
 
 	var dreams_el=document.getElementById('dreams');
 

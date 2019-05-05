@@ -1,5 +1,6 @@
 function dream_onload()
 {
+	arrange('body_content', 600);
 	if ('dream_id' in localStorage) {
 		dcn.get_dream_by_id(localStorage['dream_id'], function(dream) {
 
