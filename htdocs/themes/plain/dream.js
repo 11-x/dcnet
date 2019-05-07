@@ -1,8 +1,9 @@
 function dream_onload()
 {
+	var toolbar=new Toolbar(document.getElementById('toolbar'));
 	arrange('body_content', 600);
-	if ('dream_id' in localStorage) {
-		dcn.get_dream_by_id(localStorage['dream_id'], function(dream) {
+	if (dcn.get_dream_id()) {
+		dcn.get_dream_by_id(dcn.get_dream_id(), function(dream) {
 
 			var date=dcn.dream_get(dream, 'date');
 			if (date)
@@ -30,6 +31,7 @@ function dream_onload()
 	} else {
 		document.getElementById("date").value=
 			new Date().toJSON().slice(0, 10);
+		document.getElementById("delete_btn").disabled=true;
 	}
 
 }
@@ -52,14 +54,35 @@ function add_tag(type, tag)
 	}
 
 	var tags_span=document.getElementById('tags');
+	var base_el=document.createElement('span');
 	var el=document.createElement('span');
 	el.innerHTML={
 		'ptags': '+',
 		'qtags': '?',
 		'ntags': '&#x2212;'
 	}[type] + tag;
-	tags_span.appendChild(el);
-	tags_span.appendChild(document.createTextNode(' '));
+	el.classList=[{
+		'ptags': 'ptag',
+		'qtags': 'qtag',
+		'ntags': 'ntag'
+	}[type]];
+	base_el.appendChild(el);
+
+	var del=document.createElement('span');
+	del.innerHTML='&#x2716';
+	del.classList=[{
+		'ptags': 'ptag',
+		'qtags': 'qtag',
+		'ntags': 'ntag'
+	}[type]];
+	del.style.cursor="pointer";
+	del.onclick=function(){
+		tags_span.removeChild(base_el);
+	};
+	base_el.appendChild(del);
+
+	base_el.appendChild(document.createTextNode(' '));
+	tags_span.appendChild(base_el);
 
 	tag_el.value='';
 	tag_el.focus();
@@ -77,7 +100,7 @@ function send_btn_clicked()
 	var tags=document.getElementById('tags').children;
 
 	for (var i=0; i<tags.length; i++) {
-		var tag=tags[i].innerText;
+		var tag=tags[i].children[0].innerText;
 		if (tag[0]=='−') {
 			tag='-'+tag.slice(1);
 		}
@@ -97,7 +120,7 @@ function send_btn_clicked()
 	var send_btn=document.getElementById('send_btn');
 	send_btn.disabled=true;
 
-	var dream_id=localStorage['dream_id'];
+	var dream_id=dcn.get_dream_id();
 
 	if (dream_id) {
 		dcn.dream_update(dream_id, data, function() {
@@ -116,19 +139,19 @@ function send_btn_clicked()
 	}
 }
 
-function dream_delete_clicked()
+function delete_btn_clicked()
 {
-	if (confirm('Удалить безвозвратно?')) {
-		var del_btn=document.getElementById('delete_btn');
-		del_btn.disabled=true;
-		var dream_id=document.getElementById('dreamid').value;
-		dream_delete(dream_id, function(res) {
-			if (res['success']) {
-				document.location.href=res['redirect'];
-			} else {
-				alert('Delete failed: ' + res['error_message']);
-				del_btn.disabled=false;
-			}
-		});
-	}
+	if (!confirm('Удалить безвозвратно?'))
+		return;
+	
+	var btn=document.getElementById('delete_btn');
+
+	btn.disabled=true;
+
+	dcn.dream_remove(dcn.get_dream_id(), function() {
+		history.back();
+	}, function(err_msg) {
+		alert('Delete failed: ' + err_msg);
+		btn.disabled=false;
+	});
 }

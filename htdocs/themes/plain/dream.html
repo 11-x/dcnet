@@ -10,8 +10,8 @@
 		<link rel="stylesheet" type="text/css" href="white.css" />
 	</head>
 	<body onload="dream_onload();">
+		<div id="toolbar"></div>
 		<div id="body_content">
-			<a href="/" class="logo">DCNet</a>: Сон<br/>
 			<p><input id="date" type="date"/></p>
 			<p><input id="title" placeholder="title" 
 				style="width: 100%"/></p>
@@ -20,8 +20,10 @@
 				style="width: 100%; height: 200"
 				placeholder="description"></textarea></p>
 			<p><span id="tags"></span>
-			<input
+			<span style="white-space: nowrap;"><input
 				id="tag" placeholder="tag" 
+				autocomplete="off"
+				autocapitalize="off"
 				style="width: 100;"
 			/><button
 				onclick="add_tag('ptags');"
@@ -29,7 +31,7 @@
 				onclick="add_tag('qtags');"
 			>?</button><button
 				onclick="add_tag('ntags');"
-			>&#x2212;</button>
+			>&#x2212;</button></span>
 			</p>
 			<p><button disabled="true"
 				style="width: 100%"
@@ -40,8 +42,8 @@
 			>Добавить пузырь</button></p>
 			<hr/>
 			<p>Уровень доступа: <select id="access">
-				<option id="public">доступно всем</option>
 				<option id="private">приватно</option>
+				<option id="public">доступно всем</option>
 			</select>
 			</p>
 			<p><button disabled="true">
@@ -49,7 +51,9 @@
 			</button></p>
 			<p><button id="send_btn"
 				onclick="send_btn_clicked();">Сохранить</button>
-			<button onclick="history.back();">Назад</button></p>
+			<button onclick="history.back();">Назад</button>
+			<button id="delete_btn"
+				onclick="delete_btn_clicked();">Удалить</button></p>
 		</div>
 	</body>
 </html>

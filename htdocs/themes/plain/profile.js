@@ -1,5 +1,6 @@
 function body_onload()
 {
+	new Toolbar(document.getElementById('toolbar'));
 	arrange('body_content', 200);
 
 	if (dcn.get_username())

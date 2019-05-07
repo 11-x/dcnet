@@ -1,6 +1,6 @@
 function register_btn_clicked()
 {
-	arrange(document.getElementById('body_content'));
+	arrange('body_content', 600);
 	var btn=document.getElementById("register_btn");
 	var user=document.getElementById("user").value;
 	var pass=document.getElementById("pass").value;

@@ -11,30 +11,30 @@
 			}
 
 			switch($_GET['cmd']) {
-				/*
-				case "get_user_info":
-					$user_id=get_logged_user();
-					if (!empty($user_id)) {
-						$info=get_user_info($user_id);
-						$info['user_id']=$user_id;
-						respond_json(200, 'Logged In', $info);
-					} else {
-						respond(204, 'Not Logged In');
+				case "fetch_ts":
+					if (empty($_GET['user_id'])) {
+						respond(400, 'fetch: user_id not specified');
 					}
+					$user_id=$_GET['user_id'];
+					$dreams=_dreams_load($user_id);
+					$timestamp=$_dreams_last_timestamp;
+					_log("last ts: $timestamp for $user_id");
+					respond_text(200, 'OK', $timestamp);
 					break;
-				case "logoff":
-					unset($_SESSION['logged_in_user_id']);
-					respond(204, 'Logged Off');
-					break;
-			*/
 				case "fetch":
 					if (empty($_GET['user_id'])) {
 						respond(400, 'fetch: user_id not specified');
 					}
 					$user_id=$_GET['user_id'];
 					$dreams=_dreams_load($user_id);
+					$timestamp=$_dreams_last_timestamp;
 					if (empty($_GET['dream_id'])) {
-						respond_text(200, 'OK', json_dumps($dreams));
+						respond_text(200, 'OK',
+							json_dumps(array(
+								"dreams" => $dreams,
+								"timestamp" => $timestamp
+							))
+						);
 					} else {
 						$dream_id=$_GET['dream_id'];
 						if (array_key_exists($dream_id, $dreams)) {
@@ -44,6 +44,13 @@
 							respond_text(404, 'Dream Not Found');
 						}
 					}
+					break;
+				case "delete":
+					if (empty($_GET['dream_id']))
+						respond(400, "'dream_id' not set");
+					$dream_id=$_GET['dream_id'];
+					dream_delete($dream_id);
+					respond(204, 'Deleted');
 					break;
 				default:
 					throw new Exception("'cmd' not recognized: "

@@ -8,3 +8,33 @@ a.logo {
 	text-decoration: none;
 	cursor: pointer;
 }
+.ptag {
+	background-color: #cfc;
+	padding: 2;
+	white-space: nowrap;
+	font-size: small;
+}
+.qtag {
+	background-color: #ffc;
+	padding: 2;
+	white-space: nowrap;
+	font-size: small;
+}
+.ntag {
+	background-color: #fcc;
+	padding: 2;
+	white-space: nowrap;
+	font-size: small;
+}
+.public {
+	font-style: italic;
+	background-color: #ccf;
+	padding: 2;
+	font-size: small;
+}
+.private {
+	font-style: italic;
+	color: #ccc;;
+	padding: 2;
+	font-size: small;
+}

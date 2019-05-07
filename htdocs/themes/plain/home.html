@@ -3,22 +3,47 @@
 	<meta http-equiv="Content-Type"
 		content="text/html;charset=UTF-8" />
 	<head>
-		<title>DCNet &#8212; Главная</title>
+		<title>DCNet &#8212; Dreams</title>
 		<script src="home.js"></script>
 		<script src="../../dcn.js"></script>
 		<script src="plain.js"></script>
 		<link rel="stylesheet" type="text/css" href="white.css" />
 	</head>
-	<body onload="arrange('body_content', 200);">
+	<body onload="body_onload();">
+		<div id="toolbar"></div>
 		<div id="body_content">
-			<p>
-			<a href="/" class="logo">DCNet</a>: Главная</p>
-			<p><a href="profile.html">Профиль</a></p>
 			<p><button onclick="new_dream();">Добавить сон</button></p>
-			<p><a href="dreams.html">Искать сны</a></p>
-			<p><button onclick="logoff_btn_clicked(this);">
-					Выйти
-			</button></p>
+			<div id="searchbar" style="width: 100%">
+				<input style="width: 70%" id="search"
+					onkeypress="search_key_pressed();" />
+				<button onclick="search_btn_clicked();">Поиск</button>
+				<span style="cursor: pointer" onclick="toggle_help()">
+					?
+				</span>
+			</div>
+			<div style="display: none" id="help">
+				<p><b>Фильтр по тексту</b><br/>
+				В строке поиска вводятся слова, которые должны
+				присутствовать в описании или заголовке сна.
+				Ищется полное совпадение слов без учёта регистра.
+				</p>
+
+				<p><b>Фильтр по тегам</b><br/>
+				Если слово начинается с +, - или ?, то это фильтр по
+				тегам.
+				</p>
+
+				<p><b>Фильтрация по датам</b><br/>
+				Если слово начинается с &lt; или &gt;, то оно фильтрует
+				дату сна.
+				</p>
+
+				<p><b>Пример</b><br/>
+				Запрос "дома +город &lt;2019-05-07 с краю" оставит сны,
+				содержащие слова "дома", "с", "краю" (без учёта регистра),
+				отмеченные тегом "+город" и имеющие дату до 7 мая 2019 г.
+			</div>
+			<p id="dreams">loading...</p>
 		</div>
 	</body>
 </html>

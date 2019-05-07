@@ -23,6 +23,17 @@ function dream_add($data)
 	return $id;
 }
 
+function dream_delete($dream_id)
+{
+	$user_id=get_logged_user();
+
+	$dreams=_dreams_load($user_id);
+
+	unset($dreams[$dream_id]);
+
+	_dreams_save($user_id, $dreams);
+}
+
 function dream_update($dream_id, $data)
 {
 	if (!is_logged_in()) {
@@ -50,19 +61,26 @@ function dream_update($dream_id, $data)
 
 function _dreams_load($user_id)
 {
+	global $_dreams_last_timestamp;
 	$path=DREAMS_DIR . $user_id;
 
 	if (!file_exists($path)) {
+		$_dreams_last_timestamp=NULL;
 		return array();
 	} else {
+		$_dreams_last_timestamp=filemtime($path);
 		return json_decode(file_get_contents($path), TRUE);
 	}
+
 }
 
 function _dreams_save($user_id, $dreams)
 {
-	file_put_contents(DREAMS_DIR . $user_id, json_encode($dreams,
+	global $_dreams_last_timestamp;
+	$path=DREAMS_DIR . $user_id;
+	file_put_contents($path, json_encode($dreams,
 		JSON_PRETTY_PRINT));
+	$_dreams_last_timestamp=filemtime($path);
 }
 
 function dream_get($author, $id)
