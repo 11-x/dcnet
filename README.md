@@ -171,6 +171,8 @@ Returns:
 
 ### Fetch dream data
 
+Note: should split this request into two commands: 'fetch' and 'fetch_all'
+
 	GET /dreams.php?cmd=fetch&user_id=<user_id>
 	GET /dreams.php?cmd=fetch&user_id=<user_id>&dream_id=<dream_id>
 
@@ -179,5 +181,47 @@ It not, all dreams are returned.
 
 Returns:
 
-	200 <dreams data as json>
-	404
+	200 <dreams data as json> (see format below)
+	400 No user_id specified
+	404 No such user_id/dream_id
+
+Data format (one dream):
+
+	{
+		"date": "YYYY-MM-DD",
+		"title": "<title>",
+		"description": "<description>",
+		"tags": ["+some", "?tags", "-here", ...]
+		".protected": {
+			"<key>": "<encrypted data>",
+			...
+		}
+	}
+
+All fields are optional.
+
+Data format (all dreams):
+
+	{
+		"timestamp": <timestamp>,
+		"dreams": {
+			"<dream_id>": {<dream data>},
+			...
+		}
+	}
+
+Here <dream data> is in the same format as for one dream.
+
+
+### Delete dream
+
+	(DELETE) GET /dreams.php?cmd=delete&dream_id=<dream_id>
+
+Delete given dream permanently. Dream must belong to currently logged
+in user.
+
+Returns:
+
+	204 Deleted
+	400 dream_id not set
+	404 Dream id not found
