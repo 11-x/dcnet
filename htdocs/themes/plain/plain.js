@@ -16,6 +16,17 @@ function Toolbar(base_el)
 	this._userspan=document.createElement('span');
 	this._userspan.style.float='right';
 
+	this._add_dream_btn=document.createElement('button');
+	this._add_dream_btn.innerText='Добавить сон';
+	this._add_dream_btn.onclick=function() {
+		localStorage['dream_return']=window.location;
+		dcn.set_dream_id(undefined);
+		location='dream.html';
+	};
+	this._userspan.appendChild(this._add_dream_btn);
+
+	this._userspan.appendChild(document.createTextNode(' '));
+
 	this._user_el=document.createElement('a');
 	this._user_el.href='profile.html';
 	this._user_el.innerText=dcn.get_username();
@@ -87,3 +98,12 @@ function arrange(el, width)
 	parent_el.appendChild(center_table(width, el));
 }
 
+// Validate session
+function validate_session(){
+	dcn.check_logged_in(function(status) {
+		if (!status) {
+			alert('Время сессии истекло');
+			location="/";
+		}
+	});
+}

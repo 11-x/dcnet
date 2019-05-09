@@ -1,8 +1,21 @@
 <?
 	require_once('common.php');
 	require_once('users_db.php');
+	require_once('dreams_db.php');
 	header('Access-Control-Allow-Origin: *');
 
+	function count_dreams($users)
+	{
+		$res=array();
+
+		foreach ($users as $user_id => $data) {
+			$res[$user_id]=$data;
+			$dreams=_dreams_load($user_id);
+			$res[$user_id]['total_dreams']=sizeof($dreams);
+		}
+
+		return $res;
+	}
 	function get_salt($username)
 	{
 		$user_id=get_user_by_username($username);
@@ -73,7 +86,7 @@
 
 			switch($_GET['cmd']) {
 				case "get_user_info":
-					$user_id=get_logged_user();
+					$user_id=_get($_GET['user_id'], get_logged_user());
 					if (!empty($user_id)) {
 						$info=get_user_info($user_id);
 						$info['user_id']=$user_id;
@@ -85,6 +98,9 @@
 				case "logoff":
 					unset($_SESSION['logged_in_user_id']);
 					respond(204, 'Logged Off');
+					break;
+				case "get_users":
+					respond_json(200, 'OK', count_dreams(get_users()));
 					break;
 				default:
 					throw new Exception("'cmd' not recognized: "
@@ -108,6 +124,13 @@
 				case 'update_profile':
 					update_profile($cmd['items']);
 					break;
+				case 'delete':
+					if (!is_logged_in()) {
+						throw new Exception('not logged in');
+					}
+					remove_user(get_logged_user());
+					respond(204, 'Deleted');
+					break;
 				default:
 					throw new Exception("'cmd' not recognized: "
 						. json_encode($cmd));
@@ -117,6 +140,7 @@
 				. $_SERVER['REQUEST_METHOD']);
 		}
 	} catch (Exception $x) {
+		_log("500 EXCEPTION: " . $x->getMessage());
 		respond_text(500, 'Exception', $x->getMessage());
 	} finally {
 		set_error_handler(NULL);

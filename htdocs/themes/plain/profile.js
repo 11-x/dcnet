@@ -1,3 +1,5 @@
+validate_session();
+
 function body_onload()
 {
 	new Toolbar(document.getElementById('toolbar'));

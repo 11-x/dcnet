@@ -57,18 +57,18 @@ var dcn=new function(){
 				throw "No such key";
 			}
 
-			var passwords=sjcl.decode(this.get_pass(), info['.passwords']);
+			var passwords={};
+			if (this.get_pass() && info['.passwords']) {
+				sjcl.decrypt(this.get_pass(), info['.passwords']);
+			}
 
-			if (!key in passwords) {
+			if (!user_id in passwords) {
 				throw "No such key";
 			}
 
-			return passwords[key];
+			return passwords[user_id];
 		}
 	};
-
-	/// Clear all user data from browser's local storage
-	this.purge=function() {};
 
 	//
 	// Implementation
@@ -97,7 +97,11 @@ var dcn=new function(){
 			if (this.responseText.indexOf('<b>Parse error</b>')!=-1) {
 				console.error(this.status, this.statusText, this.responseText);
 			} else {
-				console.log(this.status, this.statusText, this.responseText.slice(0, 100));
+				//console.log(this.status, this.statusText, this.responseText.slice(0, 100));
+			}
+			if (this.status==0) {
+				console.error(this);
+				return;
 			}
 			if (typeof(cb)!="undefined") {
 				cb(this.status, this.statusText, this.responseText);
@@ -245,7 +249,6 @@ var dcn=new function(){
 			items: items
 		}), function(code, reason, data)
 		{
-			console.log(code, reason, data);
 			if (code==200) {
 				localStorage['info']=data;
 				if (pass)
@@ -267,6 +270,7 @@ var dcn=new function(){
 			return JSON.parse(localStorage['info'])['email'];
 	};
 
+	/// Clear all user data from browser's local storage
 	this.purge=function() {
 		localStorage.clear();
 	};
@@ -368,7 +372,10 @@ var dcn=new function(){
 
 	this.get_dream_id=function() { return localStorage['dream_id']; }
 	this.set_dream_id=function(dream_id) {
-		localStorage['dream_id']=dream_id;
+		if (typeof(dream_id)=="undefined")
+			delete localStorage['dream_id'];
+		else
+			localStorage['dream_id']=dream_id;
 	}
 
 	this.dream_update=function(dream_id, data, cb_ok, cb_err) {
@@ -429,7 +436,8 @@ var dcn=new function(){
 		var res={};
 		for (var key in dict) {
 			var pass=this.get_pass(key);
-			res[key]=JSON.parse(sjcl.decrypt(pass, dict[key]));
+			if (pass)
+				res[key]=JSON.parse(sjcl.decrypt(pass, dict[key]));
 		}
 		return res;
 	}
@@ -440,7 +448,6 @@ var dcn=new function(){
 
 		var self=this;
 
-		console.log(this.get_user_id()==user_id, 'cache' in localStorage);
 		if (this.get_user_id()==user_id && localStorage['cache'])
 		{
 			var cached_timestamp=localStorage['cache-ts'];
@@ -452,10 +459,7 @@ var dcn=new function(){
 				} else {
 					var server_timestamp=data;
 
-					console.log(server_timestamp, cached_timestamp);
-
 					if (server_timestamp==cached_timestamp) {
-						console.log('use cached');
 						cb_ok(JSON.parse(localStorage['cache']));
 					} else {
 						// need refresh
@@ -498,10 +502,10 @@ var dcn=new function(){
 						}
 					}
 				}
-				localStorage['cache-ts']=timestamp;
-				localStorage['cache']=JSON.stringify(res);
-				console.log('stored', timestamp,
-					localStorage['cache'].length/1024, 'KB');
+				if (user_id==self.get_user_id()) {
+					localStorage['cache-ts']=timestamp;
+					localStorage['cache']=JSON.stringify(res);
+				}
 				cb_ok(res);
 			} else {
 				cb_err(code + ' ' + reason + '\n' + data);
@@ -509,8 +513,9 @@ var dcn=new function(){
 		});
 	}
 
-	this.get_dream_by_id=function(dream_id, cb_ok, cb_err) {
-		var user_id=this.get_user_id();
+	this.get_dream_by_id=function(user_id, dream_id, cb_ok, cb_err) {
+		if (typeof(user_id)=="undefined")
+			user_id=this.get_user_id();
 		var self=this;
 
 		this._get('/dreams.php?cmd=fetch&user_id='
@@ -539,18 +544,41 @@ var dcn=new function(){
 		});
 	};
 
-	this.dream_get=function(dream, field)
+	this.dream_get=function(dream, field, default_value)
 	{
 		if (field in dream) {
+			console.log(field, dream[field]);
+			if (!dream[field])
+				return default_value;
+
 			return dream[field];
 		}
 		if ('.protected' in dream) {
 			for (var key in dream['.protected']) {
 				if (field in dream['.protected'][key]) {
+					if (!dream['.protected'][key][field])
+						return default_value;
 					return dream['.protected'][key][field];
 				}
 			}
 		}
+		return default_value;
+	}
+
+	this.dream_is_accessible=function(dream)
+	{
+		for (var key in dream) {
+			if (key!=".protected") {
+				return true;
+			} else {
+				for (var k in dream[key]) {
+					if (typeof(dream[key][k])!="string") {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	this.dream_get_tags=function(dream)
@@ -569,6 +597,37 @@ var dcn=new function(){
 		}
 		return tags;
 	}
+
+	this.get_users=function(cb_ok, cb_err)
+	{
+		this._get('/users.php?cmd=get_users', function(code, reason, data) {
+			if (code==200) {
+				cb_ok(JSON.parse(data));
+			} else {
+				cb_err(code + ' ' + reason + '\n' + data);
+			}
+		});
+	};
+
+	this.get_user_info=function(user_id, cb_ok, cb_err) {
+		if (typeof(user_id)=="undefined")
+			user_id=this.get_user_id();
+
+		if ('info' in localStorage && user_id==dcn.get_user_id()) {
+			cb_ok(JSON.parse(localStorage['info']));
+			return;
+		}
+
+		this._get('/users.php?cmd=get_user_info&user_id='
+			+ encodeURIComponent(user_id), function(code, reason, data)
+		{
+			if (code==200) {
+				cb_ok(JSON.parse(data));
+			} else {
+				cb_err(code + ' ' + reason + '\n' + data);
+			}
+		});
+	};
 
 }();
 

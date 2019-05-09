@@ -1,9 +1,87 @@
+validate_session();
+
+function go_back()
+{
+	if (typeof(localStorage['dream_return'])=="undefined")
+		history.back();
+	else
+		location=localStorage['dream_return'];
+}
+
+function dream_view_onload()
+{
+	var toolbar=new Toolbar(document.getElementById('toolbar'));
+	arrange('body_content', 600);
+	dcn.get_user_info(localStorage['dreams_user_id'], function(info) {
+		document.getElementById('author').innerText=info.username;
+	});
+	if (dcn.get_user_id()!=localStorage['dreams_user_id']
+			&& typeof(localStorage['dreams_user_id'])!="undefined") {
+		document.getElementById('edit_section').style.display="none";
+	}
+	if (dcn.get_dream_id()) {
+		dcn.get_dream_by_id(localStorage['dreams_user_id'],
+			dcn.get_dream_id(), function(dream)
+		{
+			console.log(dream);
+
+			var date=dcn.dream_get(dream, 'date');
+			if (date)
+				document.getElementById('date').innerText=date;
+
+			var title=dcn.dream_get(dream, 'title');
+			if (title)
+				document.getElementById('title').innerText=title;
+
+			var description=dcn.dream_get(dream, 'description');
+			if (description)
+				document.getElementById('description').innerText
+					=description;
+
+			var tags_el=document.getElementById('tags');
+			var tags=dcn.dream_get(dream, 'tags');
+			if (tags) for (var i=0; i<tags.length; i++) {
+				var tag=tags[i];
+
+				var el=document.createElement('span');
+				el.classList=[{
+					'+': 'ptag', '?': 'qtag', '-': 'ntag'
+				}[tag[0]]];
+				if (tag[0]!='-')
+					el.innerText=tag[0]+tag.slice(1);
+				else
+					el.innerHTML='&#x2212;'+tag.slice(1);
+				tags_el.appendChild(el);
+				tags_el.appendChild(document.createTextNode(' '));
+			}
+
+			if ('.protected' in dream) {
+				document.getElementById('access').innerHTML
+					='<span class="private">private</span>';
+			} else
+				document.getElementById('access').innerHTML
+					='<span class="public">public</span>';
+		}, function(err_msg) {
+			alert('Dream fetch failed: ' + err_msg);
+		});
+	} else {
+		history.back();
+	}
+}
 function dream_onload()
 {
 	var toolbar=new Toolbar(document.getElementById('toolbar'));
 	arrange('body_content', 600);
 	if (dcn.get_dream_id()) {
-		dcn.get_dream_by_id(dcn.get_dream_id(), function(dream) {
+		if (localStorage['dreams_user_id']!=dcn.get_user_id()
+				&& typeof(localStorage['dreams_user_id'])!="undefined") {
+			window.location.replace('dream_view.html');
+			return;
+		}
+		dcn.get_dream_by_id(localStorage['dreams_user_id'],
+			dcn.get_dream_id(), function(dream)
+		{
+			console.log(dream);
 
 			var date=dcn.dream_get(dream, 'date');
 			if (date)
@@ -26,7 +104,10 @@ function dream_onload()
 
 			if ('.protected' in dream) {
 				document.getElementById('private').selected=true;
-			}
+			} else
+				document.getElementById('public').selected=true;
+		}, function(err_msg) {
+			alert('Dream fetch failed: ' + err_msg);
 		});
 	} else {
 		document.getElementById("date").value=
@@ -124,14 +205,14 @@ function send_btn_clicked()
 
 	if (dream_id) {
 		dcn.dream_update(dream_id, data, function() {
-			location="home.html";
+			go_back();
 		}, function(err_msg) {
 			alert('Dream update failed: ' + err_msg);
 			send_btn.disabled=false;
 		});
 	} else {
 		dcn.dream_add(data, function() {
-			location="home.html";
+			go_back();
 		}, function(err_msg) {
 			alert("Add dream failed: " + err_msg);
 			send_btn.disabled=false;

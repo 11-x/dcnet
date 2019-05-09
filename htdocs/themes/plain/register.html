@@ -5,8 +5,8 @@
 	<head>
 		<title>DCNet &#8212; Регистрация</title>
 		<script src="../../dcn.js"></script>
-		<script src="register.js"></script>
 		<script src="plain.js"></script>
+		<script src="register.js"></script>
 		<link rel="stylesheet" type="text/css" href="white.css" />
 	</head>
 	<body onload="arrange('body_content', 200);">
@@ -19,6 +19,9 @@
 				placeholder="pass"/></p>
 			<p><input id="pass2" type="password"
 				placeholder="confirm pass"/></p>
+			<i>Важно: пароль нельзя восстановить (на сервере он
+			не хранится). При утере пароля
+			все защищённые данные станут недоступны.</i>
 			<p><button
 				id="register_btn"
 				onclick="register_btn_clicked();"

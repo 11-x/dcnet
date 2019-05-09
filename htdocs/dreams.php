@@ -18,7 +18,6 @@
 					$user_id=$_GET['user_id'];
 					$dreams=_dreams_load($user_id);
 					$timestamp=$_dreams_last_timestamp;
-					_log("last ts: $timestamp for $user_id");
 					respond_text(200, 'OK', $timestamp);
 					break;
 				case "fetch":
@@ -41,7 +40,7 @@
 							respond_text(200, 'OK',
 								json_dumps($dreams[$dream_id]));
 						} else {
-							respond_text(404, 'Dream Not Found');
+							respond(404, 'Dream Not Found');
 						}
 					}
 					break;
@@ -77,6 +76,7 @@
 				. $_SERVER['REQUEST_METHOD']);
 		}
 	} catch (Exception $x) {
+		_log("500 Exception (dreams): " . $x->getMessage());
 		respond_text(500, 'Exception', $x->getMessage());
 	} finally {
 		set_error_handler(NULL);

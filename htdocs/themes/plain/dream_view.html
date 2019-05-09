@@ -1,0 +1,33 @@
+<html>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="Content-Type"
+		content="text/html;charset=UTF-8" />
+	<head>
+		<title>DCNet &#8212; Сон</title>
+		<script src="../../dcn.js"></script>
+		<script src="plain.js"></script>
+		<script src="dream.js"></script>
+		<link rel="stylesheet" type="text/css" href="white.css" />
+	</head>
+	<body onload="dream_view_onload();">
+		<div id="toolbar"></div>
+		<div id="body_content">
+			<p id="author"></p>
+			<p>
+				<i><span id="date"></span></i>
+				<b><span id="title"></span></b>
+				<span id="access"></span>
+			</p>
+			<p id="description"></p>
+			<p id="tags"></p>
+			<p>
+				<span id="edit_section">
+					<button onclick="location.replace('dream.html');">
+						Редактировать
+					</button>
+				</span>
+				<button onclick="history.back();">Назад</button>
+			</p>
+		</div>
+	</body>
+</html>

@@ -89,7 +89,9 @@ function _users_save($users)
  */
 function is_valid_username($s)
 {
-	return preg_match('/^[_a-zA-Z][_a-zA-Z0-9]+$/', $s);
+	//return preg_match('/^[_a-zA-Z][_a-zA-Z0-9]+$/', $s);
+	_log("is_valid_username?: " . $s);
+	return preg_match('/^\w\w+$/u', $s);
 }
 
 /**
@@ -207,6 +209,20 @@ function get_user_by_username($username)
 	}
 
 	return NULL;
+}
+function get_users()
+{
+	$users=_users_load();
+
+	$res=array();
+
+	foreach ($users as $id => $info) {
+		$res[$id]=array(
+			'username'=>$info['username']
+		);
+	}
+
+	return $res;
 }
 function get_user_info($user_id)
 {

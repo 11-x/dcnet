@@ -1,6 +1,5 @@
 function register_btn_clicked()
 {
-	arrange('body_content', 600);
 	var btn=document.getElementById("register_btn");
 	var user=document.getElementById("user").value;
 	var pass=document.getElementById("pass").value;
@@ -8,6 +7,7 @@ function register_btn_clicked()
 
 	if (pass!=pass2) {
 		alert('pass and confirmation missmatch');
+		return;
 	}
 
 	btn.disabled=true;
