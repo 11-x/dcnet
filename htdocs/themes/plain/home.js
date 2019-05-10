@@ -8,12 +8,12 @@ function body_onload()
 
 function new_dream()
 {
-	delete localStorage['dream_id'];
+	delete sessionStorage['dream_id'];
 	location="dream.html";
 }
 
 function search_dreams()
 {
-	delete localStorage['dreams_user_id'];
+	delete sessionStorage['dreams_user_id'];
 	location="dreams.html";
 }

@@ -19,7 +19,7 @@ function Toolbar(base_el)
 	this._add_dream_btn=document.createElement('button');
 	this._add_dream_btn.innerText='Добавить сон';
 	this._add_dream_btn.onclick=function() {
-		localStorage['dream_return']=window.location;
+		sessionStorage['dream_return']=window.location;
 		dcn.set_dream_id(undefined);
 		location='dream.html';
 	};

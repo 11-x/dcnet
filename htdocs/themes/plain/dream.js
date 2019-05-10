@@ -1,26 +1,32 @@
 validate_session();
 
+function switch_to_edit()
+{
+	sessionStorage['dream_return']=location;
+	location.replace('dream.html');
+}
+
 function go_back()
 {
-	if (typeof(localStorage['dream_return'])=="undefined")
+	if (typeof(sessionStorage['dream_return'])=="undefined")
 		history.back();
 	else
-		location=localStorage['dream_return'];
+		location=sessionStorage['dream_return'];
 }
 
 function dream_view_onload()
 {
 	var toolbar=new Toolbar(document.getElementById('toolbar'));
 	arrange('body_content', 600);
-	dcn.get_user_info(localStorage['dreams_user_id'], function(info) {
+	dcn.get_user_info(sessionStorage['dreams_user_id'], function(info) {
 		document.getElementById('author').innerText=info.username;
 	});
-	if (dcn.get_user_id()!=localStorage['dreams_user_id']
-			&& typeof(localStorage['dreams_user_id'])!="undefined") {
+	if (dcn.get_user_id()!=sessionStorage['dreams_user_id']
+			&& typeof(sessionStorage['dreams_user_id'])!="undefined") {
 		document.getElementById('edit_section').style.display="none";
 	}
 	if (dcn.get_dream_id()) {
-		dcn.get_dream_by_id(localStorage['dreams_user_id'],
+		dcn.get_dream_by_id(sessionStorage['dreams_user_id'],
 			dcn.get_dream_id(), function(dream)
 		{
 			console.log(dream);
@@ -73,12 +79,12 @@ function dream_onload()
 	var toolbar=new Toolbar(document.getElementById('toolbar'));
 	arrange('body_content', 600);
 	if (dcn.get_dream_id()) {
-		if (localStorage['dreams_user_id']!=dcn.get_user_id()
-				&& typeof(localStorage['dreams_user_id'])!="undefined") {
+		if (sessionStorage['dreams_user_id']!=dcn.get_user_id()
+				&& typeof(sessionStorage['dreams_user_id'])!="undefined") {
 			window.location.replace('dream_view.html');
 			return;
 		}
-		dcn.get_dream_by_id(localStorage['dreams_user_id'],
+		dcn.get_dream_by_id(sessionStorage['dreams_user_id'],
 			dcn.get_dream_id(), function(dream)
 		{
 			console.log(dream);
@@ -211,7 +217,9 @@ function send_btn_clicked()
 			send_btn.disabled=false;
 		});
 	} else {
-		dcn.dream_add(data, function() {
+		dcn.dream_add(data, function(dream_id) {
+			sessionStorage['dream_id']=dream_id;
+			console.log('back', sessionStorage['dream_back']);
 			go_back();
 		}, function(err_msg) {
 			alert("Add dream failed: " + err_msg);

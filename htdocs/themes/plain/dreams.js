@@ -5,9 +5,9 @@ function body_onload()
 	var toolbar=new Toolbar(document.getElementById('toolbar'));
 	arrange('body_content', 600);
 
-	refresh_dreams(localStorage['dreams_user_id'], '');
+	refresh_dreams(sessionStorage['dreams_user_id'], '');
 
-	dcn.get_user_info(localStorage['dreams_user_id'],
+	dcn.get_user_info(sessionStorage['dreams_user_id'],
 		function(info)
 	{
 		document.getElementById('author').innerText=info.username;
@@ -28,7 +28,7 @@ function toggle_help()
 
 function new_dream()
 {
-	delete localStorage['dream_id'];
+	delete sessionStorage['dream_id'];
 	location="dream.html";
 }
 
@@ -93,6 +93,8 @@ function refresh_dreams(user_id, query)
 
 	dcn.get_user_dreams(user_id, function(dreams) {
 		var html='';
+		var html2={
+		};
 
 		for (var dream_id in dreams) {
 			var dream=dreams[dream_id];
@@ -103,7 +105,11 @@ function refresh_dreams(user_id, query)
 			if (!dcn.dream_is_accessible(dream))
 				continue;
 
-			html+='<p><a href="#" onclick="open_dream(\''
+			var date=dcn.dream_get(dream, 'date', '(no date)');
+			if (!(date in html2))
+				html2[date]=[];
+
+			var html_item='<p><a href="#" onclick="open_dream(\''
 				+ dream_id + '\');">'
 				+ dcn.dream_get(dream, 'date', '<i>(no date)</i>') + ' ' 
 				+ dcn.dream_get(dream, 'title', '<i>(no title)</i>')
@@ -116,19 +122,29 @@ function refresh_dreams(user_id, query)
 			var tags=dcn.dream_get_tags(dream);
 
 			if (tags)
-				html+='<br/>';
+				html_item+='<br/>';
 			for (var i=0; i<tags.length; i++) {
 				var tag=tags[i];
 
-				html+='<span class="' + {
+				html_item+='<span class="' + {
 					'+': 'ptag',
 					'?': 'qtag',
 					'-': 'ntag'
 				}[tag[0]] + '">' + tag + '</span> ';
 			}
 
-			html+='</p>\n';
+			html_item+='</p>\n';
+
+			html+=html_item;
+			html2[date].push(html_item);
 		}
+
+		html='';
+
+		for (var date in html2)
+			for (var i=0; i<html2[date].length; i++) {
+				html=html2[date][i]+html;
+			}
 
 		dreams_el.innerHTML=html;
 	}, function(err_msg) {
@@ -139,8 +155,8 @@ function refresh_dreams(user_id, query)
 
 function open_dream(dream_id)
 {
-	localStorage['dream_id']=dream_id;
-	if (dcn.get_user_id()!=localStorage['dreams_user_id']) {
+	sessionStorage['dream_id']=dream_id;
+	if (dcn.get_user_id()!=sessionStorage['dreams_user_id']) {
 		location.replace("dream_view.html");
 	} else {
 		location.replace("dream_view.html");
@@ -156,6 +172,6 @@ function search_key_pressed()
 
 function search_btn_clicked()
 {
-	refresh_dreams(localStorage['dreams_user_id'],
+	refresh_dreams(sessionStorage['dreams_user_id'],
 		document.getElementById('search').value);
 }

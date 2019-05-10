@@ -90,7 +90,7 @@
 					if (!empty($user_id)) {
 						$info=get_user_info($user_id);
 						$info['user_id']=$user_id;
-						respond_json(200, 'Logged In', $info);
+						respond_json(200, 'OK', $info);
 					} else {
 						respond(204, 'Not Logged In');
 					}
@@ -111,9 +111,9 @@
 
 			switch (_get($cmd['cmd'], NULL)) {
 				case 'register':
-					add_user($cmd['username'], $cmd['pass_hash'],
+					$user_id=add_user($cmd['username'], $cmd['pass_hash'],
 						$cmd['salt'], _get($cmd['email'], NULL));
-					respond(201, 'User Registered');
+					respond_text(201, 'User Registered', $user_id);
 					break;
 				case 'get_salt':
 					get_salt($cmd['username']);

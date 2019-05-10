@@ -26,6 +26,6 @@ function body_onload()
 
 function see_user(user_id)
 {
-	localStorage['dreams_user_id']=user_id;
+	sessionStorage['dreams_user_id']=user_id;
 	location='dreams.html';
 }

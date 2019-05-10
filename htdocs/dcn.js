@@ -273,6 +273,7 @@ var dcn=new function(){
 	/// Clear all user data from browser's local storage
 	this.purge=function() {
 		localStorage.clear();
+		sessionStorage.clear();
 	};
 
 	this._gen_salt=function(length) {
@@ -370,12 +371,12 @@ var dcn=new function(){
 		});
 	};
 
-	this.get_dream_id=function() { return localStorage['dream_id']; }
+	this.get_dream_id=function() { return sessionStorage['dream_id']; }
 	this.set_dream_id=function(dream_id) {
 		if (typeof(dream_id)=="undefined")
-			delete localStorage['dream_id'];
+			delete sessionStorage['dream_id'];
 		else
-			localStorage['dream_id']=dream_id;
+			sessionStorage['dream_id']=dream_id;
 	}
 
 	this.dream_update=function(dream_id, data, cb_ok, cb_err) {
@@ -547,7 +548,6 @@ var dcn=new function(){
 	this.dream_get=function(dream, field, default_value)
 	{
 		if (field in dream) {
-			console.log(field, dream[field]);
 			if (!dream[field])
 				return default_value;
 
