@@ -18,10 +18,9 @@ function body_onload()
 			document.getElementById('login_btn').focus();
 	}
 
-	dcn.check_logged_in(function(status) {
-		if (status) {
-			location="/";
-		}
+	dcn.fetch_current_userid(function(user_id) {
+		if (typeof(user_id)!="undefined")
+			location="home.html?user_id=" + encodeURIComponent(user_id);
 	});
 }
 
@@ -32,8 +31,9 @@ function login_btn_clicked()
 	dcn.login(
 		document.getElementById('username').value,
 		document.getElementById('pass').value,
-		function() {
-			window.location.href="home.html";
+		function(user_id) {
+			window.location.href="home.html?user_id=" 
+				+ encodeURIComponent(user_id);
 		},
 		function(err_msg) {
 			alert('login failed: ' + err_msg);

@@ -1,5 +1,12 @@
 validate_session();
 
+function sort_users_by_creation_timestamp(unsorted)
+{
+	return unsorted.sort(function(a, b) {
+		return a.creation_timestamp-b.creation_timestamp;
+	});
+}
+
 function body_onload()
 {
 	new Toolbar(document.getElementById('toolbar'));
@@ -9,12 +16,22 @@ function body_onload()
 	dcn.get_users(function(users){
 		html='';
 
+		var unsorted_users=[];
+
 		for (var user_id in users) {
+			unsorted_users.push(users[user_id]);
+		}
+
+		var sorted_users=sort_users_by_creation_timestamp(unsorted_users);
+
+		for (var i in sorted_users) {
+			var user=sorted_users[i];
+			var user_id=user.user_id;
 			html+='<p><a href="#" onclick="see_user(\''
 				+ user_id + '\');">'
-				+ users[user_id].username + '</a> <span style="color:'
+				+ user.username + '</a> <span style="color:'
 				+ ' #888;"><i>(снов: '
-					+ users[user_id].total_dreams + ')</i></span></p>\n';
+					+ user.total_dreams + ')</i></span></p>\n';
 		}
 
 		document.getElementById('users_list').innerHTML=html;
@@ -26,6 +43,5 @@ function body_onload()
 
 function see_user(user_id)
 {
-	sessionStorage['dreams_user_id']=user_id;
-	location='dreams.html';
+	location='dreams.html?user_id=' + encodeURIComponent(user_id);
 }

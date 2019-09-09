@@ -7,6 +7,7 @@
 		<script src="../../dcn.js"></script>
 		<script src="plain.js"></script>
 		<script src="home.js"></script>
+		<script src="export.js"></script>
 		<link rel="stylesheet" type="text/css" href="white.css" />
 	</head>
 	<body onload="body_onload();">
@@ -19,8 +20,12 @@
 				<button onclick="search_dreams();">Посмотреть свои сны</button>
 			</p>
 			<p>
+				<button onclick="export_html();">Скачать базу снов</button>
+			</p>
+			<p>
 				<a href="users.html">Список пользователей</a>
 			</p>
+			<p id="tape"></p>
 		</div>
 	</body>
 </html>

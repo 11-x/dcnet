@@ -1,36 +1,74 @@
 validate_session();
 
-function switch_to_edit()
+_schemes=[];
+
+function get_dream_id()
 {
-	sessionStorage['dream_return']=location;
-	location.replace('dream.html');
+	return getQueryParam('dream_id');
 }
 
-function go_back()
+function get_user_id(default_value)
 {
-	if (typeof(sessionStorage['dream_return'])=="undefined")
-		history.back();
-	else
-		location=sessionStorage['dream_return'];
+	return getQueryParam('user_id', default_value);
+}
+
+function add_scheme()
+{
+	var el=document.getElementById("schemes");
+	var width=400, height=400;
+
+	if (width>document.documentElement.clientWidth) {
+		width=document.documentElement.clientWidth;
+		height=width;
+	}
+
+	var ed=new Editor(el, width, height);
+
+	_schemes.push(ed);
+
+	var btn_remove=document.createElement('button');
+	btn_remove.innerText='Удалить схему';
+	ed.add_custom_button(btn_remove);
+
+	var index=_schemes.length;
+
+	btn_remove.onclick=function() {
+		for (var i=0; i<_schemes.length; i++) {
+			console.log(_schemes[i]===ed, i, _schemes);
+			if (_schemes[i]===ed) {
+				_schemes=_schemes.slice(0, i).concat(
+					_schemes.slice(i+1));
+
+				el.removeChild(el.children[2*i]);
+				el.removeChild(el.children[2*i]);
+
+				return;
+			}
+		}
+	};
+}
+
+function switch_to_edit()
+{
+	location.replace('dream.html' + location.search);
 }
 
 function dream_view_onload()
 {
 	var toolbar=new Toolbar(document.getElementById('toolbar'));
 	arrange('body_content', 600);
-	dcn.get_user_info(sessionStorage['dreams_user_id'], function(info) {
+	//var user_id=query['user_id'];
+	dcn.get_user_info(get_user_id(), function(info) {
 		document.getElementById('author').innerText=info.username;
 	});
-	if (dcn.get_user_id()!=sessionStorage['dreams_user_id']
-			&& typeof(sessionStorage['dreams_user_id'])!="undefined") {
+	if (dcn.get_user_id()!=get_user_id()
+			&& typeof(get_user_id())!="undefined") {
 		document.getElementById('edit_section').style.display="none";
 	}
-	if (dcn.get_dream_id()) {
-		dcn.get_dream_by_id(sessionStorage['dreams_user_id'],
-			dcn.get_dream_id(), function(dream)
+	if (get_dream_id()) {
+		dcn.get_dream_by_id(get_user_id(),
+			get_dream_id(), function(dream)
 		{
-			console.log(dream);
-
 			var date=dcn.dream_get(dream, 'date');
 			if (date)
 				document.getElementById('date').innerText=date;
@@ -61,6 +99,16 @@ function dream_view_onload()
 				tags_el.appendChild(document.createTextNode(' '));
 			}
 
+			var schemes=dcn.dream_get(dream, 'schemes');
+
+			if (schemes) {
+				var el=document.getElementById("schemes");
+				for (var i=0; i<schemes.length; i++) {
+					add_scheme_canvas(el, schemes[i]);
+				}
+			}
+
+
 			if ('.protected' in dream) {
 				document.getElementById('access').innerHTML
 					='<span class="private">private</span>';
@@ -78,14 +126,14 @@ function dream_onload()
 {
 	var toolbar=new Toolbar(document.getElementById('toolbar'));
 	arrange('body_content', 600);
-	if (dcn.get_dream_id()) {
-		if (sessionStorage['dreams_user_id']!=dcn.get_user_id()
-				&& typeof(sessionStorage['dreams_user_id'])!="undefined") {
+	if (get_dream_id()) {
+		if (get_user_id()!=dcn.get_user_id()
+				&& typeof(get_user_id())!="undefined") {
 			window.location.replace('dream_view.html');
 			return;
 		}
-		dcn.get_dream_by_id(sessionStorage['dreams_user_id'],
-			dcn.get_dream_id(), function(dream)
+		dcn.get_dream_by_id(get_user_id(),
+			get_dream_id(), function(dream)
 		{
 			console.log(dream);
 
@@ -108,6 +156,15 @@ function dream_onload()
 					tag.slice(1));
 			}
 
+			var schemes=dcn.dream_get(dream, 'schemes');
+
+			if (schemes)
+				for (var i=0; i<schemes.length; i++) {
+					add_scheme();
+					_schemes[_schemes.length-1]._lines=schemes[i].lines;
+					_schemes[_schemes.length-1]._repaint();
+				}
+
 			if ('.protected' in dream) {
 				document.getElementById('private').selected=true;
 			} else
@@ -121,6 +178,7 @@ function dream_onload()
 		document.getElementById("delete_btn").disabled=true;
 	}
 
+	document.getElementById('date').focus();
 }
 
 function add_tag(type, tag)
@@ -194,6 +252,18 @@ function send_btn_clicked()
 		data.tags.push(tag);
 	}
 
+	if (_schemes) {
+		data.schemes=[];
+		for (var i=0; i<_schemes.length; i++) {
+			data.schemes.push({
+				lines: _schemes[i]._lines,
+				height: _schemes[i]._el.height,
+				width: _schemes[i]._el.width,
+				border: _schemes[i].BORDER_SIZE
+			});
+		}
+	}
+
 	if (document.getElementById('private').selected) {
 		var data2={
 			'.protected': {}
@@ -207,20 +277,28 @@ function send_btn_clicked()
 	var send_btn=document.getElementById('send_btn');
 	send_btn.disabled=true;
 
-	var dream_id=dcn.get_dream_id();
+	var dream_id=get_dream_id();
 
 	if (dream_id) {
 		dcn.dream_update(dream_id, data, function() {
-			go_back();
+			location.replace('dream_view.html?user_id='
+				+ get_user_id(dcn.get_user_id())
+				+ '&dream_id=' + dream_id);
 		}, function(err_msg) {
 			alert('Dream update failed: ' + err_msg);
 			send_btn.disabled=false;
 		});
 	} else {
+		console.log(dcn.get_user_id(),
+			get_user_id(dcn.get_user_id()),
+			dream_id);
 		dcn.dream_add(data, function(dream_id) {
-			sessionStorage['dream_id']=dream_id;
-			console.log('back', sessionStorage['dream_back']);
-			go_back();
+			console.log(dcn.get_user_id(),
+				get_user_id(dcn.get_user_id()),
+				dream_id);
+			location.replace('dream_view.html?user_id='
+				+ get_user_id(dcn.get_user_id())
+				+ '&dream_id=' + dream_id);
 		}, function(err_msg) {
 			alert("Add dream failed: " + err_msg);
 			send_btn.disabled=false;
@@ -237,8 +315,9 @@ function delete_btn_clicked()
 
 	btn.disabled=true;
 
-	dcn.dream_remove(dcn.get_dream_id(), function() {
-		history.back();
+	dcn.dream_remove(get_dream_id(), function() {
+		//history.back();
+		location='home.html';
 	}, function(err_msg) {
 		alert('Delete failed: ' + err_msg);
 		btn.disabled=false;

@@ -34,8 +34,10 @@
 				onclick="add_tag('ntags');"
 			>&#x2212;</button></span>
 			</p>
-			<p><button disabled="true"
+			<p><div id="schemes"></div><button
 				style="width: 100%"
+				id="_btn"
+				onclick="add_scheme();"
 			>Добавить схему</button></p>
 			<hr/>
 			<p><button disabled="true"
@@ -52,7 +54,7 @@
 			</button></p>
 			<p><button id="send_btn"
 				onclick="send_btn_clicked();">Сохранить</button>
-			<button onclick="go_back();">Назад</button>
+			<button onclick="history.back();">Назад</button>
 			<button id="delete_btn"
 				onclick="delete_btn_clicked();">Удалить</button></p>
 		</div>

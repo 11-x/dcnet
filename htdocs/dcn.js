@@ -2,33 +2,6 @@
  * The main object to access DCNet JS API.
  */
 var dcn=new function(){
-
-	//
-	// API
-	//
-
-	/// Try to login with given username/pass
-	///	cb_ok()
-	/// cb_err(error_msg, error_code)
-	this.login=function(username, pass, cb_ok, cb_err) {};
-
-	/// End current session
-	/// Callback is invoked after it is done
-	this.logoff=function(cb_ok, cb_err) {};
-
-	/// Try to login with given username/pass
-	///	cb_ok()
-	/// cb_err(error_msg, error_code)
-	this.register=function(username, pass, email, cb_ok, cb_err) {};
-
-
-	/// Update given fields of profile
-	/// Allowed fields: pass_hash, email
-	this.update_profile=function(items, cb_ok, cb_err) {};
-
-	/// Get current username/pass saved in browser (may or may not
-	/// be logged in)
-
 	/**
 	 * Get current user's username (from local storage)
 	 * @returns {String|undefined} username or undefined if no username
@@ -70,10 +43,6 @@ var dcn=new function(){
 		}
 	};
 
-	//
-	// Implementation
-	//
-
 	/**
 	 * Perform ajax request
 	 * @param method {String} HTTP method ("GET", "POST",
@@ -84,6 +53,7 @@ var dcn=new function(){
 	 */
 	this._request=function(method, url, data, cb)
 	{
+		//console.log("REQUEST " + method + " " + url + " " + data);
 		if (typeof(localStorage['.node'])!="undefined"
 				&& !new RegExp('^(?:[a-z]+:)?//', 'i').test(url)
 				&& url.indexOf('/')===0)
@@ -104,6 +74,8 @@ var dcn=new function(){
 				return;
 			}
 			if (typeof(cb)!="undefined") {
+				//console.log("response: " + this.status + " "
+				//	+ this.statusText + " " + this.responseText);
 				cb(this.status, this.statusText, this.responseText);
 			}
 		}
@@ -126,19 +98,31 @@ var dcn=new function(){
 		this._get(url, cb); // use GET instead of DELETE
 	};
 
-	/// Check if current state is 'logged in'
-	/// cb(status) will be invoked, where status is:
-	///	- true (is logged in)
-	/// - false (is not logged in)
-	/// - undefined (an error has occured)
-	this.check_logged_in=function(cb){};
+	this.default_err_handler=function(err_msg) {
+		console.error("Unhandled error:", err_msg);
+		alert("Unhandled error: " + err_msg);
+	};
+	
+	this.fetch_current_userid=function(cb_ok, cb_err) {
+		this._get('/users.php?cmd=get_user_info',
+			function(code, reason, data)
+		{
+			if (typeof(cb_ok)=="undefined")
+				cb_ok=function(){};
 
-	/**
-	 * Callback for check_logged_in
-	 *
-	 * @callback check_logged_in_callback
-	 * @param {Boolean|undefined}
-	 */
+			if (typeof(cb_err)=="undefined")
+				cb_err=self._default_err_handler;
+
+			if (code==200 && data) {
+				localStorage['info']=data;
+				cb_ok(data['user_id']);
+			} else if (code==204) {
+				cb_ok(undefined);
+			} else {
+				cb_err(code + ' ' + reason + '\n' + data);
+			}
+		});
+	};
 
 	/**
 	 * Check if session is in 'logged in' state
@@ -167,6 +151,12 @@ var dcn=new function(){
 			cmd: 'get_salt',
 			username: username
 		}), function(code, reason, data) {
+			if (typeof(cb_ok)=="undefined")
+				cb_ok=function(){};
+
+			if (typeof(cb_err)=="undefined")
+				cb_err=self._default_err_handler;
+
 			if (code!=200) {
 				cb_err('Salt fetch failed: ' + reason + '\n' + data);
 			} else {
@@ -180,9 +170,10 @@ var dcn=new function(){
 						localStorage['username']=username;
 						localStorage['pass']=pass;
 						localStorage['info']=data;
-						cb_ok();
+						data=JSON.parse(data);
+						cb_ok(data.user_id);
 					} else {
-						cb_err(reason + '\n' + data);
+						cb_err(code + ' ' + reason + '\n' + data);
 					}
 				});
 			}
@@ -230,9 +221,6 @@ var dcn=new function(){
 		var pass_flag='pass' in items;
 		var pass=undefined;
 		if (pass_flag) {
-			cb_err('Pass change not implemented');
-			// Need to recrypt all crypted data
-			return;
 			pass=items.pass;
 			var pass_err=this._validate_pass(pass);
 			if (pass_err) {
@@ -243,21 +231,45 @@ var dcn=new function(){
 			items['pass_hash']=dcn._hash(items['pass']+salt);
 			delete items['pass'];
 			items['salt']=salt;
+
+			var self=this;
+			dcn.get_user_dreams(dcn.get_user_id(),
+				function(dreams)
+			{
+				self._put('/users.php', JSON.stringify({
+					cmd: 'update_profile',
+					items: items,
+					dreams: dcn._encrypt_dreams(dreams, pass)
+				}), function(code, reason, data)
+				{
+					if (code==200) {
+						localStorage['info']=data;
+						if (pass)
+							localStorage['pass']=pass;
+						cb_ok();
+					} else {
+						cb_err(code + ' ' + reason + '\n' + data);
+					}
+				});
+			}, function(err_msg) {
+				cb_err(err_msg);
+			});
+		} else {
+			this._put('/users.php', JSON.stringify({
+				cmd: 'update_profile',
+				items: items
+			}), function(code, reason, data)
+			{
+				if (code==200) {
+					localStorage['info']=data;
+					if (pass)
+						localStorage['pass']=pass;
+					cb_ok();
+				} else {
+					cb_err(code + ' ' + reason + '\n' + data);
+				}
+			});
 		}
-		this._put('/users.php', JSON.stringify({
-			cmd: 'update_profile',
-			items: items
-		}), function(code, reason, data)
-		{
-			if (code==200) {
-				localStorage['info']=data;
-				if (pass)
-					localStorage['pass']=pass;
-				cb_ok();
-			} else {
-				cb_err(code + ' ' + reason + '\n' + data);
-			}
-		});
 	};
 
 	this.get_user_id=function() {
@@ -627,8 +639,33 @@ var dcn=new function(){
 				cb_err(code + ' ' + reason + '\n' + data);
 			}
 		});
+
 	};
 
+	this._encrypt_dreams=function(dreams, new_pass)
+	{
+		dreams=JSON.parse(JSON.stringify(dreams));
+		var old_pass=localStorage['pass'];
+		try {
+			localStorage['pass']=new_pass;
+
+			for (var dream_id in dreams) {
+				var dream=dreams[dream_id];
+				if ('.protected' in dream)
+					dream['.protected']=this._protect(dream['.protected']);
+
+				if ('bubbles' in dream)
+					for (var i=0; i<dream['bubbles'].length; i++) {
+						if ('.protected' in dream['bubbles'][i])
+							dream.bubbles[i]['.protected']
+								=this._protect(dream.bubbles[i]['.protected']);
+					}
+			}
+		} finally {
+			localStorage['pass']=old_pass;
+		}
+		return dreams;
+	}
 }();
 
 /*

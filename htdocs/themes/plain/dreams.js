@@ -5,9 +5,14 @@ function body_onload()
 	var toolbar=new Toolbar(document.getElementById('toolbar'));
 	arrange('body_content', 600);
 
-	refresh_dreams(sessionStorage['dreams_user_id'], '');
+	if (typeof(getQueryParam("user_id"))=="undefined")
+		location.replace("dreams.html?user_id="
+			+ encodeURIComponent(dcn.get_user_id()));
 
-	dcn.get_user_info(sessionStorage['dreams_user_id'],
+	var user_id=getQueryParam('user_id');
+	refresh_dreams(user_id, '');
+
+	dcn.get_user_info(user_id,
 		function(info)
 	{
 		document.getElementById('author').innerText=info.username;
@@ -28,7 +33,6 @@ function toggle_help()
 
 function new_dream()
 {
-	delete sessionStorage['dream_id'];
 	location="dream.html";
 }
 
@@ -141,10 +145,15 @@ function refresh_dreams(user_id, query)
 
 		html='';
 
-		for (var date in html2)
+		var dates=Object.keys(html2).sort();
+
+
+		for (var j=0; j<dates.length; j++) {
+			var date=dates[j];
 			for (var i=0; i<html2[date].length; i++) {
 				html=html2[date][i]+html;
 			}
+		}
 
 		dreams_el.innerHTML=html;
 	}, function(err_msg) {
@@ -155,12 +164,12 @@ function refresh_dreams(user_id, query)
 
 function open_dream(dream_id)
 {
-	sessionStorage['dream_id']=dream_id;
-	if (dcn.get_user_id()!=sessionStorage['dreams_user_id']) {
-		location.replace("dream_view.html");
-	} else {
-		location.replace("dream_view.html");
-	}
+	var user_id=getQueryParam('user_id', dcn.get_user_id());
+	var url="dream_view.html?user_id="
+		+ encodeURIComponent(user_id)
+		+ "&dream_id=" + encodeURIComponent(dream_id);
+
+	location=url;
 }
 
 function search_key_pressed()
@@ -172,6 +181,6 @@ function search_key_pressed()
 
 function search_btn_clicked()
 {
-	refresh_dreams(sessionStorage['dreams_user_id'],
+	refresh_dreams(getQueryParam('user_id'),
 		document.getElementById('search').value);
 }
