@@ -3,11 +3,8 @@
 import web, os, json, shelve, random, datetime, time
 from common import gen_id
 from tape import Tape, TapeHandler
-from node import Node
 
 
-cfg=json.loads(open('config.json').read())
-_node=Node(cfg)
 tape=Tape('tape.json')
 TapeHandler.Tape=tape
 
@@ -104,6 +101,25 @@ class DreamsDB:
 		open(self.get_dreams_path(uid), 'w').write(dump.encode('utf-8'))
 		_log('DreamsDB.update', uid, did, data)
 	
+	def post_comment(self, auid, did, cuid, comment):
+		dreams=self.get_dreams(auid)
+		assert did in dreams
+
+		if 'comments' not in dreams[did]:
+			dreams[did]['comments']=[]
+		dreams[did]['comments'].append({
+			'timestamp': int(time.mktime(
+				datetime.datetime.now().timetuple())),
+			'commenter_id': cuid,
+			'text': comment
+		})
+
+		dump=json.dumps(dreams, indent=4, ensure_ascii=False,
+			sort_keys=True)
+		open(self.get_dreams_path(auid), 'w').write(dump.encode('utf-8'))
+		_log('DreamsDB.post_comment', auid, did, cuid, comment)
+		
+
 	def add(self, uid, data):
 		udreams=self.get_dreams(uid)
 		did=gen_id(lambda x: x not in udreams)
@@ -232,7 +248,6 @@ class UsersDB:
 		_log('UsersDB.update', uid, items, 'success')
 		return json.dumps(users[uid])
 		
-	
 	def by_name(self, username):
 		users=json.loads(open('users.json').read())
 		
@@ -378,6 +393,39 @@ class Dreams:
 				'dream_id': did
 			})
 			return did
+			
+		elif cmd=='post_comment':
+			if not session.get('logged_in_user_id'):
+				web.ctx.status='403 Not Logged In'
+				_log('POST', 'dreams.php', web.data(),
+					'403 error: not logged in')
+				return
+			uid=session.get('logged_in_user_id')
+			author_uid=req['dream_author_id']
+			if not ddb.dream_exists(author_uid, req['dream_id']):
+				web.ctx.status='404 Dream Not Found'
+				_log('POST', 'dreams.php', web.data(),
+					'404 error: dream not found')
+				return '%s %s' % (uid, req['dream_id'])
+
+			if req['comment_author_id']!=uid:
+				web.ctx.status='403 Logged In As Different User'
+				_log('POST', 'dreams.php', web.data(),
+					'403 error: logged in as different user')
+				return
+
+			ddb.post_comment(author_uid, req['dream_id'], uid,
+				req['comment']);
+			tape.submit_event({
+				'type': 'comment_dream',
+				'dream_author_id': author_uid,
+				'dream_author_username': udb.uname(author_uid),
+				'comment_author_id': uid,
+				'comment_author_username': udb.uname(uid),
+				'dream_id': req['dream_id']
+			})
+			web.ctx.status='201 Commented'
+			return
 			
 		else:
 			web.ctx.status='501 Not Implemented'

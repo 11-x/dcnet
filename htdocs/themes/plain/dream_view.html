@@ -29,6 +29,20 @@
 				</span>
 				<button onclick="history.back();">Назад</button>
 			</p>
+			<div id="comments"></div>
+			<div id="comment_section" hidden="hidden">
+				<div id="comments"></div>
+				<textarea
+					id="comment"
+					placeholder="Добавить комментарий"
+					style="width: 100%"
+					rows="5"
+				></textarea>
+				<br/>
+				<button onclick="post_comment();">
+					Добавить комментарий
+				</button>
+			</div>
 		</div>
 	</body>
 </html>

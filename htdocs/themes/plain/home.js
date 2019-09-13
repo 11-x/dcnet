@@ -41,9 +41,9 @@ function timeConverter(UNIX_timestamp){
   var year = a.getFullYear();
   var month = months[a.getMonth()];
   var date = a.getDate();
-  var hour = a.getHours();
-  var min = a.getMinutes();
-  var sec = a.getSeconds();
+  var hour = ('0' + a.getHours()).slice(-2);
+  var min = ('0' + a.getMinutes()).slice(-2);
+  var sec = ('0' + a.getSeconds()).slice(-2);
   var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
   return time;
 }
@@ -96,6 +96,16 @@ function render_event(timestamp, idx, ev)
 		return '';
 	} else if (ev.type=='anonymous_active') {
 		return '';
+	} else if (ev.type=='comment_dream') {
+		console.log(ev);
+		return '<div class="activity">' + timeConverter(timestamp)
+			+ ' ' + user_ref(ev['comment_author_username'],
+				ev['comment_author_id']) + ' commented on ' 
+				+ user_ref(ev['dream_author_username'],
+				ev['dream_author_id']) + "'s "
+				+ dream_ref('dream', ev['dream_author_id'], ev['dream_id'])
+				+ '</div>';
+		
 	} else {
 		console.error('unexpected event type', ev);
 	}

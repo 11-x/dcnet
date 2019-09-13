@@ -98,7 +98,7 @@ var dcn=new function(){
 		this._get(url, cb); // use GET instead of DELETE
 	};
 
-	this.default_err_handler=function(err_msg) {
+	this._default_err_handler=function(err_msg) {
 		console.error("Unhandled error:", err_msg);
 		alert("Unhandled error: " + err_msg);
 	};
@@ -141,6 +141,32 @@ var dcn=new function(){
 				cb(false);
 			} else {
 				cb(undefined);
+			}
+		});
+	};
+
+	this.comment_dream=function(user_id, dream_id, comment_text, cb_ok,
+		cb_err)
+	{
+		var self=this;
+		this._post('/dreams.php', JSON.stringify({
+			cmd: "post_comment",
+			dream_author_id: user_id,
+			dream_id: dream_id,
+			comment: comment_text,
+			comment_author_id: dcn.get_user_id()
+		}), function (code, reason, data) {
+			if (typeof(cb_ok)=="undefined")
+				cb_ok=function(){};
+			
+			if (typeof(cb_err)=="undefined") {
+				cb_err=self._default_err_handler;
+			}
+
+			if (code!=201) {
+				cb_err("Comment dream failed: " + reason + "\n" + data);
+			} else {
+				cb_ok();
 			}
 		});
 	};

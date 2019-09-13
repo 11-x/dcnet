@@ -12,6 +12,22 @@ function get_user_id(default_value)
 	return getQueryParam('user_id', default_value);
 }
 
+function post_comment()
+{
+	let ta=document.getElementById("comment");
+	let text=ta.value;
+
+	if (!text) {
+		alert("Empty comment");
+		ta.focus();	
+		return;
+	}
+
+	dcn.comment_dream(get_user_id(), get_dream_id(), text, ()=>{
+		location.reload();
+	});
+}
+
 function add_scheme()
 {
 	var el=document.getElementById("schemes");
@@ -108,13 +124,26 @@ function dream_view_onload()
 				}
 			}
 
+			var comments=dcn.dream_get(dream, 'comments');
+
+			if (comments)
+				for (let i=0; i<comments.length; i++) {
+					add_comment(comments[i]);
+				}
+
 
 			if ('.protected' in dream) {
 				document.getElementById('access').innerHTML
 					='<span class="private">private</span>';
-			} else
+				if (dcn.get_user_id()==get_user_id()
+						&& typeof(get_user_id())!="undefined") {
+					document.getElementById("comment_section").hidden=false;
+				}
+			} else {
 				document.getElementById('access').innerHTML
 					='<span class="public">public</span>';
+				document.getElementById("comment_section").hidden=false;
+			}
 		}, function(err_msg) {
 			alert('Dream fetch failed: ' + err_msg);
 		});
@@ -122,6 +151,43 @@ function dream_view_onload()
 		history.back();
 	}
 }
+
+function user_ref(username, user_id)
+{
+	return '<a href="/themes/plain/dreams.html?user_id='
+		+ user_id + '">' + username + '</a>';
+}
+function timeConverter(UNIX_timestamp){
+  var a = new Date(UNIX_timestamp * 1000);
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var year = a.getFullYear();
+  var month = months[a.getMonth()];
+  var date = a.getDate();
+  var hour = ('0' + a.getHours()).slice(-2);
+  var min = ('0' + a.getMinutes()).slice(-2);
+  var sec = ('0' + a.getSeconds()).slice(-2);
+  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+  return time;
+}
+
+
+function add_comment(comment)
+{
+	let div=document.getElementById("comments");
+
+	let el=document.createElement('p');
+	el.innerText=comment.text;
+
+	dcn.get_user_info(comment.commenter_id, (info)=>{
+		let username=info.username;
+		el.innerHTML+='<br/><i>by ' + user_ref(username,
+			comment.commenter_id) + ' at '
+			+ timeConverter(comment.timestamp) + '</i>';
+	});
+
+	div.appendChild(el);
+}
+
 function dream_onload()
 {
 	var toolbar=new Toolbar(document.getElementById('toolbar'));
@@ -135,7 +201,7 @@ function dream_onload()
 		dcn.get_dream_by_id(get_user_id(),
 			get_dream_id(), function(dream)
 		{
-			console.log(dream);
+		//	console.log(dream);
 
 			var date=dcn.dream_get(dream, 'date');
 			if (date)
