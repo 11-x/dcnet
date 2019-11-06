@@ -1,0 +1,7 @@
+{
+	"node_name": "My Awesome Node",
+	"log_path": "stream.log",
+	"node_privkey_path": "./secrets/node_id",
+	"https_cert_path": "./secrets/127.0.0.1.crt",
+	"https_privkey_path": "./secrets/127.0.0.1.key"
+}

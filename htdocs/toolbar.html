@@ -1,0 +1,15 @@
+$def with(userinfo)
+<table width="100%"><tr>
+	<td align="left">
+		<span
+			class="logo"
+			onclick="location='/';"
+		>DCNet</span>
+	</td>
+	<td align="right">
+		$if userinfo is not None:
+			<button>Добавить сон</button>
+			<span class="username">$userinfo['username']</span>
+			<span>logoff</span>
+	</td>
+</tr></table>

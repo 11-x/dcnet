@@ -1,0 +1,26 @@
+$def with(body, **kwargs)
+<html>
+	<head>
+		$if 'title' in kwargs:
+			<title>$kwargs['title'] &mdash; DCNet</title>
+		$else:
+			<title>DCNet</title>
+		$for script in kwargs.get('scripts', []):
+			<script language="javascript" src="htdocs/$script"></script>
+	</head>
+	<body onload="$kwargs.get('onload', '')">
+		<table width="100%">
+			<tr>
+				<td width="*">
+					&nbsp;
+				</td>
+				<td width="$kwargs.get('width', '200')">
+					$:body
+				</td>
+				<td width="*">
+					&nbsp;
+				</td>
+			</td>
+		</table>
+	</body>
+</html>

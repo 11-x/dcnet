@@ -1,0 +1,18 @@
+$def with ()
+<html>
+	<head>
+		<script src="htdocs/dcn.js"></script>
+		<script language="javascript">
+function _boot()
+{
+	if (typeof dcn.uid == "undefined") {
+		location="/gate";
+	} else {
+		location="/user?uid=" + encodeURIComponent(dcn.uid);
+	}
+}
+		</script>
+	</head>
+	<body onload="_boot();">
+	</body>
+</html>

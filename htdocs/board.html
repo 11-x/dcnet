@@ -1,0 +1,22 @@
+$def with(title, toolbar, body)
+<html>
+	<head>
+		<title>$title</title>
+		<script language="javascript">
+			function _init()
+			{
+			}
+		</script>
+	</head>
+	<body onload="_init();">
+		
+		<div>
+		$:toolbar
+		</div>
+
+		<div>
+		$:body
+		</div>
+
+	</body>
+</html>
