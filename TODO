@@ -1,8 +1,9 @@
+write installation manual
 Replicate dcnet1 functionality
 - tape of PUBLIC EVENTS
-
 automate dreams import when logged in
 document certificates configuration
 add keys & certs documentation
 add node installation manual
 change config format from JSON to plain text
+on startup verify node key against public node key in .nodes/
