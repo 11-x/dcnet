@@ -1,0 +1,9 @@
+$def with(uid, username)
+	$if username is not None:
+		<span class="user_banner"
+			onclick="location='/user/$uid';"
+		>$(username)</span>
+	$else:
+		<span class="user_banner"
+			onclick="location='/user/$uid';"
+		>U$uid</span>

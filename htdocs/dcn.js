@@ -285,6 +285,11 @@ class DCN
 		this.crypt=new Crypt();
 	}
 
+	logoff() {
+		this.purge();
+		location="/";
+	}
+
 	get username() {
 		return localStorage.username;
 	}

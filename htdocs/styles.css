@@ -1,0 +1,12 @@
+.logo {
+	cursor: pointer;
+}
+.logoff {
+	cursor: pointer;
+}
+.user_banner {
+	font-style: italic;
+	text-decoration: underline;
+	color: #458;
+	cursor: pointer;
+}

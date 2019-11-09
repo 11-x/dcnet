@@ -193,10 +193,10 @@ class Gate:
 	@wrap_exceptions
 	def GET(self):
 		return render.page(
-			render.gate(),
+			render.gate(render),
 			width=200,
 			title='Вход',
-			scripts=['dcn.js', 'gate.js'], 
+			scripts=['gate.js'], 
 			onload='gate_onload();')
 
 class Register:
@@ -206,7 +206,7 @@ class Register:
 			render.register(),
 			width=200,
 			title='Регистрация',
-			scripts=['dcn.js', 'register.js'])
+			scripts=['register.js'])
 
 class Readme:
 	@wrap_exceptions
@@ -248,7 +248,7 @@ class Home:
 	def GET(self):
 		uid=web.input().get('self')
 		return render.page(render.home(uid),
-			toolbar=render.toolbar(get_userinfo(uid)))
+			toolbar=render.toolbar(render, get_userinfo(uid)))
 
 class Index:
 	@wrap_exceptions
@@ -411,9 +411,14 @@ def _flush_db():
 	open('data.json', 'w').write(dump)
 
 def init_node():
-	global db
+	global db, cfg
+
+	if 'private_key' not in cfg:
+		cfg['private_key']=open(cfg['node_privkey_path']).read()
+
 	if 'public_key' not in cfg:
 		cfg['public_key']=get_public_key(cfg['private_key'])
+	
 	node_id=get_node_id(cfg['public_key'], cfg['node_name'])
 	if '.nodes' not in db:
 		db['.nodes']={}

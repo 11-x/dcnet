@@ -1,15 +1,12 @@
-$def with(userinfo)
+$def with(render, userinfo)
 <table width="100%"><tr>
 	<td align="left">
-		<span
-			class="logo"
-			onclick="location='/';"
-		>DCNet</span>
+		$:render.logo()
 	</td>
 	<td align="right">
 		$if userinfo is not None:
-			<button>Добавить сон</button>
-			<span class="username">$userinfo['username']</span>
-			<span>logoff</span>
+			<!-- <button>Добавить сон</button> -->
+			$:render.user_banner(userinfo.get('uid'), userinfo.get('username'))
+			<span class="logoff" onclick="dcn.logoff();">logoff</span>
 	</td>
 </tr></table>
