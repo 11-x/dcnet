@@ -438,6 +438,13 @@ class DCN
 			});
 		});
 	}
+
+	/**
+	 Create a new channel
+	 */
+	async create_channel()
+	{
+	}
 };
 
 dcn=new DCN();
