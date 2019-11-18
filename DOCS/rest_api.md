@@ -46,7 +46,7 @@ Special channels (start with '.'):
 		"usig": "<user signature>",
 		"perm": "<hash>" // optional, hash of current active channel
 			// descriptor, which provide the permission
-	   } -> "<uid>"
+	   } -> (201) "<iid>"
 
 /j/<cid>/<iid>
    GET -> <value>

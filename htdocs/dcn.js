@@ -290,6 +290,17 @@ class DCN
 		location="/";
 	}
 
+	get uid() {
+		return localStorage.uid;
+	}
+
+	set uid(uid) {
+		if (uid)
+			return localStorage.uid=uid;
+		else
+			delete localStorate.uid;
+	}
+
 	get username() {
 		return localStorage.username;
 	}
@@ -441,9 +452,44 @@ class DCN
 
 	/**
 	 Create a new channel
+	 Returns cid of the newly created channel
 	 */
-	async create_channel()
+	async create_channel(name, description, writers, moderators)
 	{
+		if (typeof this.uid=="undefined")
+			throw "not authorized";
+
+		let chan_spec={
+			owner: this.uid
+		};
+		if (typeof name!="undefined")
+			chan_spec.name=name;
+		if (typeof description!="undefined")
+			chan_spec.description=description;
+		if (typeof writers!="undefined")
+			chan_spec.writers=writers;
+		if (typeof moderators!="undefined")
+			chan_spec.moderators=moderators;
+		
+		let data={
+			uid: this.uid,
+			cid: ".chans",
+			val: chan_spec
+		};
+		let jdata=JSON.stringify(data);
+
+		let resp=await this.request("POST", "/j/.chans",
+			JSON.stringify({
+				jdata: jdata,
+				usig: await(this.sign(jdata))
+			}));
+
+		if (resp.code!=201) {
+			throw "Channel creation failed: " + resp.code + " "
+				+ resp.reason + " " + resp.data;
+		}
+
+		return resp.data;
 	}
 };
 
