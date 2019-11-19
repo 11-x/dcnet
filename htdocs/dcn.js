@@ -290,6 +290,17 @@ class DCN
 		location="/";
 	}
 
+	get userinfo() {
+		return JSON.parse(localStorage.userinfo);
+	}
+
+	set userinfo(userinfo) {
+		if (userinfo)
+			return localStorage.userinfo=JSON.stringify(userinfo);
+		else
+			delete localStorage.userinfo;
+	}
+
 	get uid() {
 		return localStorage.uid;
 	}
@@ -298,7 +309,7 @@ class DCN
 		if (uid)
 			return localStorage.uid=uid;
 		else
-			delete localStorate.uid;
+			delete localStorage.uid;
 	}
 
 	get username() {
@@ -323,6 +334,10 @@ class DCN
 			delete localStorage.pass;
 	}
 
+	get priv_key() {
+		return localStorage.priv_key;
+	}
+
 	/**
 	 Clen up browser state to forget the user
 	 */
@@ -331,15 +346,12 @@ class DCN
 	}
 
 	/**
-	 Verify current user credentials on server
+	 Verify user credentials on server
 
-	 Returns uid on success or undefined on failure
+	 Returns {uid:uid, userinfo:userinfo} on success or undefined on failure
 	 */
-	async verify_credentials()
+	async verify_credentials(username, pass)
 	{
-		let username=localStorage.username;
-		let pass=localStorage.pass;
-
 		if (typeof username=="undefined"
 				|| typeof pass=="undefined") {
 			return;
@@ -386,8 +398,10 @@ class DCN
 			if (typeof privkey_b64=="undefined")
 				return; // key mismatch
 
-			if (await this.crypt.keys_match(privkey_b64, userinfo.pub_key))
-				return uid;
+			if (await this.crypt.keys_match(privkey_b64,
+					userinfo.pub_key)) {
+				return { uid: uid, userinfo: userinfo };
+			}
 			// TODO: ensure that code operates correctly when password
 			// is wrong and no/invalid privkey is decoded
 
@@ -395,6 +409,26 @@ class DCN
 		}
 		return; // no match
 	}
+	
+	async set_credentials(username, pass)
+	{
+		let cred=await this.verify_credentials(username, pass);
+
+		if (typeof cred=="undefined")
+			throw "Invalid username/pass";
+
+		console.log(username, pass, cred);
+		this.username=username;
+		this.pass=pass;
+		this.uid=cred.uid;
+		this.userinfo=cred.userinfo;
+		localStorage.priv_key=await this.crypt.decrypt(
+			cred.userinfo.priv_key, pass);
+		console.log(localStorage.priv_key);
+	
+		return;
+	}
+				
 
 	// callback-based request
 	_request_cb(method, url, data, cb, cb_err)
@@ -478,12 +512,17 @@ class DCN
 		};
 		let jdata=JSON.stringify(data);
 
+		console.log('here', jdata, this.priv_key);
+		let usig=await this.crypt.sign(jdata, this.priv_key);
+		console.log('there');
+
 		let resp=await this.request("POST", "/j/.chans",
 			JSON.stringify({
 				jdata: jdata,
-				usig: await(this.sign(jdata))
+				usig: usig
 			}));
 
+		console.log(resp);
 		if (resp.code!=201) {
 			throw "Channel creation failed: " + resp.code + " "
 				+ resp.reason + " " + resp.data;

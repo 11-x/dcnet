@@ -216,6 +216,13 @@ class Readme:
 			width="80%")
 
 def get_item_val(cid, iid):
+	'''
+	Get 'val' field of the item
+
+	Raises NotFound if no cid or iid exist
+
+	Raises KeyError if no 'val' field present (deleted item)
+	'''
 	if cid not in db:
 		if cid not in ['.users', '.chans', '.nodes']:
 			raise NotFound('Channel not found: ' + cid)
@@ -228,7 +235,7 @@ def get_item_val(cid, iid):
 	print db[cid][iid]
 	ndata=json.loads(db[cid][iid]['jndata'])
 	data=json.loads(ndata['jdata'])
-	return data.get('val')
+	return data['val'] # no 'val' field in deleted items causes KeyError
 
 def get_userinfo(uid):
 	if uid is None:
@@ -264,6 +271,90 @@ def validate_user_descriptor(val):
 	if 'pub_key' not in val:
 		raise BadRequest('Public key missing in descriptor')
 	
+def validate_chan_descriptor(cd):
+	if 'owner' not in cd:
+		raise BadRequest('No owner specified')
+	
+	# Ensure user exists and is not deleted
+	try:
+		user_desc=get_item_val('.users', cd['owner'])
+	except NotFound:
+		raise BadRequest('Owner uid not found')
+	except KeyError:
+		raise BadRequest('User is deleted')
+	
+	# TODO: check if user is allowed to post
+
+	for key in cd:
+		if key not in ['owner', 'name', 'description']:
+			raise BadRequest('Unexpected field: ' + key)
+
+def verify_usig(data, uid, usig):
+	'''
+	Returns bool: true of signature is OK
+	'''
+	try:
+		user_desc=get_item_val('.users', uid)
+	except NotFound as x:
+		return False
+
+	return verify(data, user_desc['pub_key'], usig)
+
+def post_chans(jdata, usig):
+	'''
+	An item is being posted to '.chans' channel
+	'''
+	data=json.loads(jdata)
+
+	if data['cid']!='.chans':
+		raise BadRequest('invalid cid')
+	
+	# Check user exists
+
+	if 'val' not in data:
+		raise BadRequest('no "val" in jdata')
+	
+	if 'owner' not in data['val']:
+		raise BadRequest('no owner specified')
+	
+	owner=data['val']['owner']
+
+	if owner not in db.get('.users', {}):
+		raise BadRequest('Invalid owner uid')
+	
+	# Validate user signature
+
+	if not verify_usig(jdata, owner, usig):
+		raise BadRequest('Invalid signature')	
+
+	# Verify channel descriptor
+
+	validate_chan_descriptor(data.get('val'))
+
+	# All seems ok, actually create
+
+	# Generate cid
+	cid=node_id + gen_id(lambda x: node_id+x not in db.get('.chans', {}))
+
+	# Store descriptor
+
+	ndata={
+		'jdata': jdata,
+		'usig': usig,
+		'iid': cid
+	}
+	jndata=json.dumps(ndata)
+
+	if '.chans' not in db:
+		db['.chans']={}
+
+	db['.chans'][cid]={
+		'jndata': jndata,
+		'nsig': sign(jndata, cfg['private_key'])
+	}
+	_flush_db()
+
+	return resp(201, json=cid)
 
 def post_users(jdata, usig):
 	'''
@@ -294,18 +385,22 @@ def post_users(jdata, usig):
 		if data['val'].get('username')==username:
 			raise Conflict('Username already taken')
 
+	user_id=get_user_id(pub_key)
+
+	if user_id in db.get('.users', {}):
+		raise Conflict('Public key hash collision')
+
 	# all ok, create the user
 
 	if '.users' not in db:
 		db['.users']={}
 	
-	user_id=gen_id(lambda x: x not in db['.users'])
-
 	ndata={
 		'jdata': jdata,
 		'usig': usig,
 		'iid': user_id
 	}
+
 	jndata=json.dumps(ndata)
 
 	db['.users'][user_id]={
@@ -340,7 +435,7 @@ class Chan:
 		if cid=='.users':
 			return post_users(req['jdata'], req['usig'])
 		elif cid=='.chans':
-			return post_chans()
+			return post_chans(req['jdata'], req['usig'])
 		elif cid=='.nodes':
 			return post_nodes()
 		else:
@@ -406,12 +501,15 @@ class SelfTest:
 def get_node_id(pubkey, name):
 	return hash8(pubkey+name)
 
+def get_user_id(pubkey):
+	return hash8(pubkey)
+
 def _flush_db():
 	dump=json.dumps(db, indent=1, sort_keys=True, ensure_ascii=False)
 	open('data.json', 'w').write(dump)
 
 def init_node():
-	global db, cfg
+	global db, cfg, node_id
 
 	if 'private_key' not in cfg:
 		cfg['private_key']=open(cfg['node_privkey_path']).read()

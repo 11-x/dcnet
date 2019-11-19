@@ -81,11 +81,8 @@ async function register_btn_clicked()
 	}));
 
 	if (resp.code==201) {
-		console.log(resp.data);
+		dcn.set_credentials(username, pass);
 		let uid=JSON.parse(resp.data);
-		dcn.uid=uid;
-		dcn.username=username;
-		dcn.pass=pass;
 		location="/home?self=" + uid;
 	} else {
 		alert('Registration failed: ' + resp.code + ' ' + resp.reason

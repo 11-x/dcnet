@@ -21,17 +21,14 @@ function login_btn_clicked()
 {
 	var btn=document.getElementById('login_btn');
 	btn.disabled=true;
-	dcn.username=document.getElementById('username').value;
-	dcn.pass=document.getElementById('pass').value;
+	let username=document.getElementById('username').value;
+	let pass=document.getElementById('pass').value;
 
-	dcn.verify_credentials().then((uid)=>{
-		if (typeof uid != "undefined") {
-			dcn.uid=uid;
-			location="/home?self=" + dcn.uid;
-		} else {
-			alert('Invalid credentials');
-			btn.disabled=false;
-		}
+	dcn.set_credentials(username, pass).then(()=>{
+		location="/home?self=" + dcn.uid;
+	}).catch((err)=>{
+		alert('Login failed: ' + err);
+		btn.disabled=false;
 	});
 }
 	
