@@ -12,12 +12,12 @@ Valid URLs:
 Channel id
 ----------
 cid is a upper-case hex string of length 32, which consists of two subids:
-node_id + chan_short_id, each of length 16. 'node_id' is the id of a
+`node_id + chan_short_id`, each of length 16. `node_id` is the id of a
 node, which created the channel.
 
 **NOTE:** later the cid convention may be extended, but the convention must
 somehow ensure that no cid collision appears. For now it is ensured by
-the node_id prefix.
+the `node_id` prefix.
 
 Node id
 -------
