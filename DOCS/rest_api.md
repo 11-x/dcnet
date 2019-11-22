@@ -12,7 +12,7 @@ Valid URLs:
 Channel id
 ----------
 cid is a upper-case hex string of length 32, which consists of two subids:
-`node_id + chan_short_id`, each of length 16. `node_id` is the id of a
+`node_id` + `chan_short_id`, each of length 16. `node_id` is the id of a
 node, which created the channel.
 
 **NOTE:** later the cid convention may be extended, but the convention must
@@ -21,24 +21,33 @@ the `node_id` prefix.
 
 Node id
 -------
-Node id is a known 8-byte hash function, applied to node public key +
-node name, and represented as a 16 hex digit string.
+Node id is a known 8-byte hash function, applied to `node public key` +
+`node name`, and represented as a 16 hex digit string.
 
 User id
 -------
-User id is a known 8-byte hash function, applied to user public key,
+User id is a known 8-byte hash function, applied to `user public key`,
 represented as a 16 hex digit string.
 
-Special channels (start with '.'):
-/j/.nodes { "<nid>": <node_info>, ... }
-/j/.users { "<uid>": <user_info>, ... }
-/j/.chans { "<cid>": <chan_info>, ... }
-/j/<cid>/<iid>
+Special channels (start with `.`):
+
+	/j/.nodes { "<nid>": <node_info>, ... }
+	/j/.users { "<uid>": <user_info>, ... }
+	/j/.chans { "<cid>": <chan_info>, ... }
+	/j/<cid>/<iid>
 
 /j
+--
+
+Get list of channels
+
    GET -> 200 ["<cid>", ...]
 
 /j/<cid>
+--------
+
+Get channel content
+
    GET -> 200 {
 		"<iid>": {
 			"jndata": J{
@@ -58,6 +67,9 @@ Special channels (start with '.'):
 			"nsig": "<node signature>"
 		}...
 	}
+
+Create new item
+
   POST {
   		"jdata": J{
 			"uid": "<uid>", // except user creation
@@ -70,7 +82,14 @@ Special channels (start with '.'):
 	   } -> (201) "<iid>"
 
 /j/<cid>/<iid>
+--------------
+
+Get item value
+
    GET -> <value>
+
+Modify item value
+
    PUT {
    		"jdata": J{
 			"uid": "<uid>",
@@ -81,6 +100,9 @@ Special channels (start with '.'):
 		},
 		"usig": "<sig>"
        } -> (none)
+
+Delete item
+
 DELETE {
 		"jdata": J{
 			"uid": "<uid>",
@@ -94,41 +116,50 @@ DELETE {
 Channel creation
 ----------------
 
-To create a channel POST an item into /.chans channel. Value must be a
-valid channel descriptor
+To create a channel POST an item into `/.chans` channel. Value must be a
+valid channel descriptor.
 
-channel descriptor: {
-	"owner": "<uid>", // owner can change the descriptor
-	"moderators": ["<uid>",...] | "*", // users, allowed to delete
-		// and rollback
-		// others' items, .. em.. ?
-	"writers": ["<uid>",...] | "*", // users, allowed to post
-		// to channel and
-		// modify/delete their own items
-	"name": "<Channel name>", // optional
-	"description": "<chan description>" // optional
-}
+channel descriptor:
 
-Special value "*" for moderators and writers means that everyone has such
+	{
+		"owner": "<uid>", // owner can change the descriptor
+		"moderators": ["<uid>",...] | "*", // users, allowed to delete
+			// and rollback
+			// others' items, .. em.. ?
+		"writers": ["<uid>",...] | "*", // users, allowed to post
+			// to channel and
+			// modify/delete their own items
+		"name": "<Channel name>", // optional
+		"description": "<chan description>" // optional
+	}
+
+Special value `"*"` for moderators and writers means that everyone has such
 a permission
 
 User creation
 -------------
 
-Anonymous can post item to the .users channel. Value must be a valid user
+Anonymous can post item to the `.users` channel. Value must be a valid user
 descriptor. The user can later modify the record.
 
-User descriptor : {
-	"pub_key": "<pub_key>",
-	"priv_key": "<priv_key>", // password protected, optional
-	"username": "<username>", // optional
-	"home": "<cid>" // optional
-}
+User descriptor:
 
-Node descriptor : {
-	"pub_key": "<pub_key>",
-	"nodename": "<nodename>" // optional
-}
+	{
+		"pub_key": "<pub_key>",
+		"priv_key": "<priv_key>", // password protected, optional
+		"username": "<username>", // optional
+		"home": "<cid>" // optional
+	}
+
+Node
+----
+
+Node descriptor:
+
+	{
+		"pub_key": "<pub_key>",
+		"nodename": "<nodename>" // optional
+	}
 
 Streaming API: TODO
 -------------------
@@ -137,15 +168,16 @@ Streaming API: TODO
 Static HTML API
 ---------------
 
-NOTE: no /j/ prefix
-NOTE: optional ?self=<uid> argument forces to transmit private user storage
-	(with private keys to decode encrypted data)
+**NOTE:** no /j/ prefix
 
-/?self=<uid> - main page
+**NOTE:** optional `?self=<uid>` argument forces to transmit private user
+storage (with private keys to decode encrypted data)
 
-/chan/<cid>?self=<uid>
+`/?self=<uid>` - main page
 
-/item/<cid>/<iid>?self=<uid>
+`/chan/<cid>?self=<uid>` - browse channel
+
+`/item/<cid>/<iid>?self=<uid>` - inspect item
 
 Node implementation recommendations
 -----------------------------------
@@ -153,6 +185,7 @@ Node implementation recommendations
 Node stores items, created by it, as well as by other nodes
 Daemon polls updates from subscribed nodes and stores them into local
 database
+
 Node can discard items, created by other nodes or users (blacklist) by
 stopping fetching and ignoring (archieving/deleting) those items
 
