@@ -11,13 +11,13 @@ Valid URLs:
 
 Channel id
 ----------
-cid is a upper-case hex string of length 32, which consists of two subids:
+`cid` is a upper-case hex string of length 32, which consists of two subids:
 `node_id` + `chan_short_id`, each of length 16. `node_id` is the id of a
 node, which created the channel.
 
-**NOTE:** later the cid convention may be extended, but the convention must
-somehow ensure that no cid collision appears. For now it is ensured by
-the `node_id` prefix.
+**NOTE:** later the `cid` convention may be extended, but the convention
+must somehow ensure that no `cid` collision appears. For now it is ensured
+by the `node_id` prefix.
 
 Node id
 -------
@@ -36,15 +36,14 @@ Special channels (start with `.`):
 	/j/.chans { "<cid>": <chan_info>, ... }
 	/j/<cid>/<iid>
 
-/j
---
+**/j**
+
 
 Get list of channels
 
 	GET -> 200 ["<cid>", ...]
 
-/j/<cid>
---------
+**/j/<cid>**
 
 Get channel content
 
@@ -81,8 +80,7 @@ Create new item
 			// descriptor, which provide the permission
 	   } -> (201) "<iid>"
 
-/j/<cid>/<iid>
---------------
+**/j/<cid>/<iid>**
 
 Get item value
 
