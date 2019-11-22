@@ -41,14 +41,14 @@ Special channels (start with `.`):
 
 Get list of channels
 
-   GET -> 200 ["<cid>", ...]
+	GET -> 200 ["<cid>", ...]
 
 /j/<cid>
 --------
 
 Get channel content
 
-   GET -> 200 {
+	GET -> 200 {
 		"<iid>": {
 			"jndata": J{
 				"jdata": J{
@@ -70,7 +70,7 @@ Get channel content
 
 Create new item
 
-  POST {
+	POST {
   		"jdata": J{
 			"uid": "<uid>", // except user creation
 			"cid": "<cid>",
@@ -86,11 +86,11 @@ Create new item
 
 Get item value
 
-   GET -> <value>
+	GET -> <value>
 
 Modify item value
 
-   PUT {
+	PUT {
    		"jdata": J{
 			"uid": "<uid>",
 			"cid": "<cid>",
@@ -103,7 +103,7 @@ Modify item value
 
 Delete item
 
-DELETE {
+	DELETE {
 		"jdata": J{
 			"uid": "<uid>",
 			"cid": "<cid>",
@@ -163,7 +163,8 @@ Node descriptor:
 
 Streaming API: TODO
 -------------------
-	Main idea: create streaming request and then GET updates
+
+**Main idea:** create streaming request and then GET updates
 
 Static HTML API
 ---------------
