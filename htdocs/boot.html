@@ -8,7 +8,7 @@ function _boot()
 	if (typeof dcn.uid == "undefined") {
 		location="/gate";
 	} else {
-		location="/user?uid=" + encodeURIComponent(dcn.uid);
+		location="/home?self=" + encodeURIComponent(dcn.uid);
 	}
 }
 		</script>

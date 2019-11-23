@@ -162,6 +162,10 @@ def get_items(cid):
 	if cid not in db:
 		if cid in ['.users', '.chans', '.nodes']:
 			return {}
+		if cid in db.get('.chans', {}):
+			# chan has no content, but it is present in .chans
+			# so we consider the channel existing and empty
+			return {}
 		raise NotFound('Channel not found: ' + cid);
 	return db[cid]
 
@@ -232,10 +236,16 @@ def get_item_val(cid, iid):
 	if iid not in db.get(cid, {}):
 		raise NotFound('Item %s not found in channel %s' % (iid, cid))
 	
-	print db[cid][iid]
 	ndata=json.loads(db[cid][iid]['jndata'])
 	data=json.loads(ndata['jdata'])
 	return data['val'] # no 'val' field in deleted items causes KeyError
+
+def get_items_val(cid):
+	items=get_items(cid)
+	res={}
+	for iid in items:
+		res[iid]=get_item_val(cid, iid)
+	return res
 
 def get_userinfo(uid):
 	if uid is None:
@@ -250,11 +260,24 @@ def get_userinfo(uid):
 
 	return userinfo
 
+def get_own_chans(uid):
+	res={}
+	for cid, desc in get_items_val('.chans').iteritems():
+		if desc['owner']==uid:
+			res[cid]=desc
+	return res
+
 class Home:
 	@wrap_exceptions
 	def GET(self):
 		uid=web.input().get('self')
-		return render.page(render.home(uid),
+		own_chans_banners=[]
+		self_suffix='?self=' + uid if uid else ''
+
+		for cid, desc in get_own_chans(uid).iteritems():
+			own_chans_banners.append(render.chan(cid,
+				desc['name'], desc['description'], self_suffix))
+		return render.page(render.home(uid, own_chans_banners),
 			toolbar=render.toolbar(render, get_userinfo(uid)))
 
 class Index:

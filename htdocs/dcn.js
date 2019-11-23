@@ -530,6 +530,29 @@ class DCN
 
 		return resp.data;
 	}
+
+	async fetch_channel(cid)
+	{
+		let resp=await this.request("GET", "/j/"+cid);
+
+		if (resp.code!=200) {
+			throw "fetch_channel '" + cid + "' failed: "
+				+ resp.code + " " + resp.reason + "\n"
+				+ resp.data;
+		}
+
+		let items={};
+		let xchans=JSON.parse(resp.data);
+
+		for (let iid in xchans) {
+			let ndata=JSON.parse(xchans[iid].jndata);
+			let data=JSON.parse(ndata.jdata);
+			if (typeof data.val!="undefined")
+				items[iid]=data.val;
+		}
+
+		return items;
+	}
 };
 
 dcn=new DCN();

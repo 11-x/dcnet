@@ -1,2 +1,4 @@
-$def with(uid)
-<input type="hidden" value="$uid" />
+$def with(uid, own_chans)
+<input type="hidden" id="self" value="$self" />
+$for ch in own_chans:
+	$:ch
