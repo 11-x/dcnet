@@ -10,10 +10,10 @@ from common import gen_id
 
 urls=(
 	'/', 'Boot',
-	'/j', 'Index',
-	'/j/', 'Index',
-	'/j/([^/]+)', 'Chan',
-	'/j/([^/]+)/([^/]+)', 'Item',
+	'/j', 'JIndex',
+	'/j/', 'JIndex',
+	'/j/([^/]+)', 'JChan',
+	'/j/([^/]+)/([^/]+)', 'JItem',
 	'/(htdocs/.+\.js)', 'Static',
 	'/(htdocs/.+\.css)', 'Static',
 	'/gate', 'Gate',
@@ -31,6 +31,7 @@ render=web.template.render('htdocs')
 DEFAULT_REASON={
 	200: 'OK',
 	201: 'Created',
+	204: 'No Content',
 	400: 'Bad Request',
 	404: 'Not Found',
 	409: 'Conflict',
@@ -75,6 +76,10 @@ def resp(code, **kwargs):
 		reason=DEFAULT_REASON[code]
 
 	web.ctx.status='%d %s' % (code, reason)
+
+	if code==204:
+		assert len(kwargs)==0
+		return
 
 	assert len(kwargs)==1
 
@@ -275,12 +280,13 @@ class Home:
 		self_suffix='?self=' + uid if uid else ''
 
 		for cid, desc in get_own_chans(uid).iteritems():
-			own_chans_banners.append(render.chan(cid,
+			own_chans_banners.append(render.chan_banner(cid,
 				desc['name'], desc['description'], self_suffix))
 		return render.page(render.home(uid, own_chans_banners),
+			width="80%",
 			toolbar=render.toolbar(render, get_userinfo(uid)))
 
-class Index:
+class JIndex:
 	@wrap_exceptions
 	def GET(self):
 		return resp(200, json=get_chans_ids())
@@ -379,6 +385,39 @@ def post_chans(jdata, usig):
 
 	return resp(201, json=cid)
 
+def put_users(uid, jdata, usig):
+	'''
+	An item is being modified in '.users' channel
+	'''
+	data=json.loads(jdata)
+
+	if data['cid']!='.users':
+		raise BadRequest('invalid cid')
+
+	validate_user_descriptor(data.get('val'))
+	
+	pub_key=data['val']['pub_key']
+
+	cur_desc=get_item_val('.users', uid)
+
+	if cur_desc['pub_key'] != pub_key:
+		raise BadRequest('public key cannot be changed')
+
+	ndata={
+		'jdata': jdata,
+		'usig': usig
+	}
+
+	jndata=json.dumps(ndata)
+
+	db['.users'][uid]={
+		'jndata': jndata,
+		'nsig': sign(jndata, cfg['private_key'])
+	}
+	_flush_db()
+
+	return resp(204)
+
 def post_users(jdata, usig):
 	'''
 	An item is being posted to '.users' channel
@@ -434,7 +473,7 @@ def post_users(jdata, usig):
 
 	return resp(201, json=user_id)
 
-class Chan:
+class JChan:
 	@wrap_exceptions
 	def GET(self, cid):
 		return resp(200, json=get_items(cid))
@@ -508,13 +547,136 @@ class Chan:
 
 			_flush_db()
 
-class Item:
+def get_user_pubkey(uid):
+	'''
+	Find user profile and get their pubkey
+
+	Raises KeyError if no user with such uid exists
+	'''
+	if uid not in db.get('.users'):
+		raise KeyError()
+	
+	desc=get_item_val('.users', uid)
+
+	assert 'pub_key' in desc
+
+	return desc['pub_key']
+	
+
+class JItem:
 	@wrap_exceptions
 	def GET(self, cid, iid):
 		return resp(200, json=db[cid][iid])
 		return resp(501,
 			text='Not implemented: cid="%s", iid="%s"' \
 			% (cid, iid))
+	
+	def PUT(self, cid, iid):
+		try:
+			req=json.loads(web.data())
+		except ValueError:
+			raise BadRequest('Not a JSON')
+
+		if 'jdata' not in req:
+			raise BadRequest("No 'jdata' field")
+		try:
+			json.loads(req['jdata'])
+		except ValueError:
+			raise BadRequest('Invalid jdata')
+		if 'usig' not in req:
+			raise BadRequest("No 'usig' field")
+
+		jdata=req['jdata']
+		data=json.loads(jdata)
+		if 'uid' not in data:
+			raise BadRequest('No uid field in jdata')
+
+		uid=data['uid']
+
+		try:
+			pub_key=get_user_pubkey(uid)
+		except KeyError:
+			raise BadRequest('User id not found')
+
+		print jdata, pub_key, 'usig', repr(req['usig'])
+		if not verify(jdata, pub_key, req['usig']):
+			raise BadRequest('Invalid user signature')
+
+		if 'rev' not in data:
+			raise BadRequest('No revision provided')
+
+		if cid not in db:
+			if cid not in ['.users', '.chans', '.nodes']:
+				raise NotFound('channel not found: %s' % cid)
+			else:
+				raise NotFound('item %s not found in chan %s' \
+					% (cid, iid))
+
+		if iid not in db.get(cid, {}):
+			raise NotFound('item %s not found in chan %s' \
+				% (cid, iid))
+
+		cur_rev=db[cid][iid]['nsig']
+
+		if data['rev'] != cur_rev:
+			raise BadRequest('Bad previous revision')
+
+		if cid=='.users':
+			return put_users(uid, jdata, req['usig'])
+		elif cid=='.chans':
+			return put_chans(req['jdata'], req['usig'])
+		elif cid=='.nodes':
+			return put_nodes()
+		else:
+			raise NotImplementedError('recheck the following')
+		raise NotImplementedError()
+
+		if False:
+			req=json.loads(web.data())
+
+			jdata=req['jdata']
+			usig=req['usig']
+
+			data=json.loads(jdata)
+
+			if not verify(jdata, get_user_pubkey(data['uid']), usig):
+				raise BadRequest()
+
+			print data
+			# TODO: verify the request throughly
+			_warn('need to verify request integrity and fitness')
+
+			perm, allowed=check_permission(data['uid'], cid)
+			if not allowed:
+				raise NotAuthorizedError()
+
+			# All OK, add the item
+
+			if cid not in db:
+				assert cid in ['.nodes', '.chans', '.users']
+
+			db[cid]={}
+
+			iid=gen_id(lambda x: x not in db[cid])
+
+			jndata={
+				'jdata': jdata,
+				'usig': usig,
+				'iid': iid
+			}
+
+			if perm is not None:
+				jndata['perm']=perm
+
+			jndata=json.dumps(jndata)
+
+			db[cid][iid]={
+				'jndata': jndata,
+				'nsig': sign(jndata, cfg['private_key'])
+			}
+
+			_flush_db()
+
 
 class SelfTest:
 	@wrap_exceptions

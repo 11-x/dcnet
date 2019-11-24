@@ -553,6 +553,71 @@ class DCN
 
 		return items;
 	}
+
+	async set_home_channel(cid)
+	{
+		if (typeof this.uid=="undefined")
+			throw "not logged in to set home channel";
+
+		// Algorithm:
+		// ensure home channel exists
+		// fetch current user_descriptor
+		// update / add "home" field
+		// put updated descriptor
+
+		let resp=await this.request("GET", "/j/" + cid);
+		if (resp.code != 200)
+			throw "channel does not exist: " + cid;
+
+		resp=await this.request("GET", "/j/.users/" + this.uid);
+
+		if (resp.code != 200)
+			throw "failed to fetch user descriptor for " + this.uid
+				+ ": " + resp.code + " " + resp.reason + "\n"
+				+ resp.data;
+
+		let xudesc=JSON.parse(resp.data);
+		let ndata=JSON.parse(xudesc.jndata)
+		let data=JSON.parse(ndata.jdata);
+		let udesc=data.val;
+
+		if (typeof cid!="undefined")
+			udesc.home=cid;
+		else if (typeof udesc.home!="undefined")
+			delete udesc.home;
+
+		data={
+			uid: this.uid,
+			cid: '.users',
+			iid: this.uid,
+			val: udesc,
+			rev: xudesc.nsig
+		};
+
+		let jdata=JSON.stringify(data);
+
+		let patch={
+			jdata: jdata,
+			usig: await this.crypt.sign(jdata, this.priv_key)
+		};
+
+		resp=await this.request("PUT", "/j/.users/" + this.uid,
+			JSON.stringify(patch));
+
+		if (resp.code!=204) {
+			throw "Update failed";
+		}
+	}
+
+	async get_item_val(cid, iid)
+	{
+		let resp=await this.request("GET", "/j/" + cid + "/" + iid);
+
+		if (resp.code!=200) throw "Fetch failed";
+
+		return JSON.parse(JSON.parse(JSON.parse(
+			resp.data).jndata).jdata).val;
+	}
 };
 
 dcn=new DCN();

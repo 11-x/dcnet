@@ -1,4 +1,16 @@
 $def with(uid, own_chans)
 <input type="hidden" id="self" value="$self" />
+My channels:
+<ul>
 $for ch in own_chans:
-	$:ch
+	<li>$:ch</li>
+</ul>
+
+<script language="javascript">
+	async function f(){
+		let udesc=await dcn.get_item_val(".users", "$uid");
+		console.log(udesc);
+		console.log(udesc.home);
+	}
+	f();
+</script>
