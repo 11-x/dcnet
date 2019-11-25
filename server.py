@@ -24,7 +24,7 @@ urls=(
 	'/home', 'Home',
 	'/user/(.+)', 'User',
 	'/chan/(.+)', 'Chan',
-	'/item/(.+)', 'Item',
+	'/item/([^/]+)/([^/]+)', 'Item',
 	'/selftest', 'SelfTest'
 )
 
@@ -308,13 +308,32 @@ def get_own_chans(uid):
 	return res
 
 def render_item_banner(cid, iid, val):
-	if 'type' not in val:
-		return render.item(cid, iid, val)
+	if type(val)==int:
+		return '%d' % val
+	elif type(val) in [str, unicode]:
+		return '%s' % val
+	
+	if type(val)!=dict or 'type' not in val:
+		return render.item_general(cid, iid, val)
 	elif val['type']=='note':
 		return render.item_note(cid, iid, val)
 	else:
-		return render.item(cid, iid, val)
+		return render.item_general(cid, iid, val)
 
+class Item:
+	@wrap_exceptions
+	def GET(self, cid, iid):
+		uid=web.input().get('self')
+		val=get_item_val(cid, iid)
+		ndata=json.loads(db[cid][iid]['jndata'])
+		data=json.loads(ndata['jdata'])
+		meta={
+			'uid': data['uid']
+		}
+		print "NDATA", ndata
+		return render.page(render.item(cid, iid, val, meta),
+			width="80%",
+			toolbar=render.toolbar(render, get_userinfo(uid)))
 
 class Home:
 	@wrap_exceptions
@@ -335,7 +354,8 @@ class Home:
 
 		home_items_banners=[]
 		for iid, item in home_items.iteritems():
-			home_items_banners.append(render_item_banner(cid, iid, item))
+			home_items_banners.append(render_item_banner(udesc['home'],
+				iid, item))
 
 		return render.page(render.home(uid,
 			own_chans_banners, home_items_banners),

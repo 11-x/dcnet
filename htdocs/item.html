@@ -1,0 +1,7 @@
+$def with(cid, iid, val, meta)
+item owner: $meta['uid']<br/>
+channel: $cid<br/>
+iid: $iid<br/>
+<hr/>
+$for k, v in val.iteritems():
+	$k = $v <br/>
