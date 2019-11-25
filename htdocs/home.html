@@ -1,9 +1,15 @@
-$def with(uid, own_chans)
+$def with(uid, own_chans, home_items)
 <input type="hidden" id="self" value="$self" />
 My channels:
 <ul>
 $for ch in own_chans:
 	<li>$:ch</li>
+</ul>
+
+Home channel items:
+<ul>
+$for it in home_items:
+	<li>$:it</li>
 </ul>
 
 <script language="javascript">
@@ -14,3 +20,4 @@ $for ch in own_chans:
 	}
 	f();
 </script>
+

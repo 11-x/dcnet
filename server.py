@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+# TODO: What about consistence of .chans items and channels in db?
+
 CERT_PATH='./cert/127.0.0.1.crt'
 PRIVKEY_PATH='./cert/127.0.0.1.key'
 
@@ -154,6 +156,39 @@ def wrap_exceptions(handler):
 			return resp(404, text='Not Found: %s' % x)
 	return safe_handler
 			
+def chan_exists(cid):
+	if cid in ['.users', '.chans', '.nodes']:
+		return True
+	
+	return cid in db.get('.chans', {})
+
+def can_write(uid, cid, perm=None):
+	if perm is not None:
+		raise NotImplementedError('handle perm')
+	if uid not in db.get('.users', {}):
+		raise BadRequest('User does not exist: %s' % uid)
+	
+	if cid not in db.get('.chans', {}):
+		raise BadRequest('Chan does not exist: %s' % cid)
+	
+	cdesc=get_item_val('.chans', cid)
+
+	assert uid is not None
+
+	if cdesc.get('owner')==uid:
+		return True
+	
+	if cdesc.get('moderators')=='*' or cdesc.get('writers')=='*':
+		return True
+	
+	if uid in cdesc.get('moderators', []):
+		return True
+	
+	if uid in cdesc.get('writers', []):
+		return True
+	
+	return False
+
 def get_chans_ids():
 	'''
 	Get list of all channel ids
@@ -272,6 +307,15 @@ def get_own_chans(uid):
 			res[cid]=desc
 	return res
 
+def render_item_banner(cid, iid, val):
+	if 'type' not in val:
+		return render.item(cid, iid, val)
+	elif val['type']=='note':
+		return render.item_note(cid, iid, val)
+	else:
+		return render.item(cid, iid, val)
+
+
 class Home:
 	@wrap_exceptions
 	def GET(self):
@@ -282,7 +326,19 @@ class Home:
 		for cid, desc in get_own_chans(uid).iteritems():
 			own_chans_banners.append(render.chan_banner(cid,
 				desc['name'], desc['description'], self_suffix))
-		return render.page(render.home(uid, own_chans_banners),
+
+		home_items={}
+		if uid is not None:
+			udesc=get_item_val('.users', uid)
+			if 'home' in udesc:
+				home_items=get_items_val(udesc['home'])
+
+		home_items_banners=[]
+		for iid, item in home_items.iteritems():
+			home_items_banners.append(render_item_banner(cid, iid, item))
+
+		return render.page(render.home(uid,
+			own_chans_banners, home_items_banners),
 			width="80%",
 			toolbar=render.toolbar(render, get_userinfo(uid)))
 
@@ -501,51 +557,46 @@ class JChan:
 		elif cid=='.nodes':
 			return post_nodes()
 		else:
-			raise NotImplementedError('recheck the following')
-			req=json.loads(web.data())
-
 			jdata=req['jdata']
 			usig=req['usig']
-
 			data=json.loads(jdata)
+			uid=data['uid']
 
 			if not verify(jdata, get_user_pubkey(data['uid']), usig):
 				raise BadRequest()
 
-			print data
-			# TODO: verify the request throughly
-			_warn('need to verify request integrity and fitness')
+			if 'cid' not in data:
+				raise BadRequest('Chan not specified')
 
-			perm, allowed=check_permission(data['uid'], cid)
-			if not allowed:
-				raise NotAuthorizedError()
+			cid=data['cid']
 
-			# All OK, add the item
+			if not chan_exists(cid):
+				raise BadRequest('Chan does not exist: %s' % cid)
 
-			if cid not in db:
-				assert cid in ['.nodes', '.chans', '.users']
+			if not can_write(uid, cid):
+				raise NotAuthorizedError('User %s cannot write to chan %s'\
+					% (uid, cid))
 
-			db[cid]={}
+			iid=node_id + gen_id(lambda x: node_id+x not in db.get(cid, {}))
 
-			iid=gen_id(lambda x: x not in db[cid])
+			# Store descriptor
 
-			jndata={
+			ndata={
 				'jdata': jdata,
 				'usig': usig,
 				'iid': iid
 			}
+			jndata=json.dumps(ndata)
 
-			if perm is not None:
-				jndata['perm']=perm
-
-			jndata=json.dumps(jndata)
+			if cid not in db:
+				db[cid]={}
 
 			db[cid][iid]={
 				'jndata': jndata,
 				'nsig': sign(jndata, cfg['private_key'])
 			}
-
 			_flush_db()
+			return resp(201, json=iid)
 
 def get_user_pubkey(uid):
 	'''

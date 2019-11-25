@@ -531,6 +531,47 @@ class DCN
 		return resp.data;
 	}
 
+	/**
+		Create a new item in given channel
+
+		Channel must exist
+
+		Permission to post to an item can be provided optionally
+
+		Returns the created item id on success
+	 */
+	async create_item(cid, val, perm)
+	{
+		if (typeof this.uid=="undefined") {
+			throw "not authorized";
+		}
+
+		let data={
+			uid: this.uid,
+			cid: cid,
+			val: val
+		};
+		if (typeof perm!="undefined")
+			data.perm=perm;
+
+		let jdata=JSON.stringify(data);
+
+		let usig=await this.crypt.sign(jdata, this.priv_key);
+
+		let resp=await this.request("POST", "/j/" + cid,
+			JSON.stringify({
+				jdata: jdata,
+				usig: usig
+			}));
+
+		if (resp.code!=201) {
+			throw "creation failed: " + resp.code + " "
+				+ resp.reason + "\n" + resp.data;
+		}
+
+		return JSON.parse(resp.data);
+	}
+
 	async fetch_channel(cid)
 	{
 		let resp=await this.request("GET", "/j/"+cid);
