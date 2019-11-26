@@ -335,6 +335,32 @@ class Item:
 			width="80%",
 			toolbar=render.toolbar(render, get_userinfo(uid)))
 
+class User:
+	@wrap_exceptions
+	def GET(self, uid):
+		self_uid=web.input().get('self')
+		desc=get_item_val('.users', uid)
+		return render.page(render.user(uid, desc),
+			width="80%",
+			toolbar=render.toolbar(render, get_userinfo(self_uid)))
+		
+
+class Chan:
+	@wrap_exceptions
+	def GET(self, cid):
+		uid=web.input().get('self')
+
+		items=get_items_val(cid)
+
+		items_banners=[]
+		for iid, item in items.iteritems():
+			items_banners.append(render_item_banner(cid, iid, item))
+
+		return render.page(render.chan(cid, items_banners),
+			width="80%",
+			toolbar=render.toolbar(render, get_userinfo(uid)))
+			
+
 class Home:
 	@wrap_exceptions
 	def GET(self):
