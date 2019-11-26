@@ -1,25 +1,10 @@
 Simple log quest
 ----------------
-
 "<id>": {
-	"type": "quest",
-	"title": "ev_logger",
-	"description": "This is a simple logging quest\nJust add logs",
-	"actions": {
-		"post_log": {
-			"type": "construct_item",
-			"item_class": "<&A>",
-			"init": {
-				"notes+=": "Record for quest {this}"
-			}
-		}
-	}
-}
-
-"<a>": {
-	"type": "data_item_spec",
-	"title": "Log Record",
-	"fields": {
+	"type": "form",
+	"caption": "Log Entry",
+	"description": "A simple log form\nGo ahead and fill it",
+	"form": {
 		"caption": {
 			"type": "string",
 			"mandatory": true,
@@ -50,6 +35,18 @@ Simple log quest
 				"values": []
 			}
 		}
+	}
+}
+
+Example of a filled form
+"<id>": {
+	"type": "filled_form",
+	"form": "<form_id>",
+	"fields": {
+		"caption": "Поход за тортом",
+		"body": "Был тёплый летний день. Я увидел в магазине торт.\nНедолго думая я зашёл в магазин и купил его.",
+		"date": "2019-06-07",
+		"tags": ["<tag_food>", "<tag_summer>"]
 	}
 }
 

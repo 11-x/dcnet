@@ -312,11 +312,19 @@ def render_item_banner(cid, iid, val):
 		return '%d' % val
 	elif type(val) in [str, unicode]:
 		return '%s' % val
+
+	ndata=json.loads(db[cid][iid]['jndata'])
+	data=json.loads(ndata['jdata'])
+	meta={
+		'uid': data['uid']
+	}
 	
 	if type(val)!=dict or 'type' not in val:
 		return render.item_general(cid, iid, val)
 	elif val['type']=='note':
 		return render.item_note(cid, iid, val)
+	elif val['type']=='form':
+		return render.item_form(cid, iid, val, meta)
 	else:
 		return render.item_general(cid, iid, val)
 
