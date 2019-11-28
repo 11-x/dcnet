@@ -1,0 +1,17 @@
+$def with(cid, iid, val, val_type)
+$if val_type==int:
+	<span class="banner_class">(int)</span>
+	<a href="/item/$cid/$iid">$val</a>
+$elif val_type!=dict:
+	<span class="banner_class">(val_type)</span>
+	<a href="/item/$cid/$iid"><i>(item)</i></a>
+$elif 'type' in val:
+	<span class="banner_class">[$val['type']]</span>
+	$if 'caption' in val:
+		<a href="/item/$cid/$iid">val['caption']</a>
+	$else:
+		<a href="/item/$cid/$iid"><i>(item)</i></a>
+$else:
+	<span class="banner_class">[custom]</span>
+	<a href="/item/$cid/$iid"><i>(item)</i></a>
+</span>

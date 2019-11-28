@@ -10,3 +10,8 @@
 	color: #458;
 	cursor: pointer;
 }
+.banner_class {
+	font-style: italic;
+	color: #888;
+	cursor: default;
+}

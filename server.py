@@ -29,6 +29,7 @@ urls=(
 )
 
 render=web.template.render('htdocs')
+render_banner=web.template.render('htdocs/banners')
 
 DEFAULT_REASON={
 	200: 'OK',
@@ -308,11 +309,6 @@ def get_own_chans(uid):
 	return res
 
 def render_item_banner(cid, iid, val):
-	if type(val)==int:
-		return '%d' % val
-	elif type(val) in [str, unicode]:
-		return '%s' % val
-
 	ndata=json.loads(db[cid][iid]['jndata'])
 	data=json.loads(ndata['jdata'])
 	meta={
@@ -320,13 +316,13 @@ def render_item_banner(cid, iid, val):
 	}
 	
 	if type(val)!=dict or 'type' not in val:
-		return render.item_general(cid, iid, val)
+		return render_banner.item_general(cid, iid, val, type(val))
 	elif val['type']=='note':
-		return render.item_note(cid, iid, val)
+		return render_banner.item_note(cid, iid, val)
 	elif val['type']=='form':
-		return render.item_form(cid, iid, val, meta)
+		return render_banner.item_form(cid, iid, val, meta)
 	else:
-		return render.item_general(cid, iid, val)
+		return render_banner.item_general(cid, iid, val, type(val))
 
 class Item:
 	@wrap_exceptions
@@ -378,7 +374,8 @@ class Home:
 
 		for cid, desc in get_own_chans(uid).iteritems():
 			own_chans_banners.append(render.chan_banner(cid,
-				desc['name'], desc['description'], self_suffix))
+				desc.get('name', '(noname)'),
+				desc.get('description', '(no description)'), self_suffix))
 
 		home_items={}
 		if uid is not None:
