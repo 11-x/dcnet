@@ -1,2 +1,12 @@
 $def with()
-<span class="logo">DCNet</span>
+<span class="logo" onclick="logo_clicked();">DCNet</span>
+<script>
+function logo_clicked()
+{
+	let url='/home';
+	if (typeof dcn.uid!="undefined") {
+		url+='?self=' + dcn.uid;
+	}
+	location=url;
+}
+</script>

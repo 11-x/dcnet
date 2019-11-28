@@ -1,14 +1,14 @@
 $def with(body, **kwargs)
 <html>
 	<head>
-		<link rel="stylesheet" href="htdocs/styles.css" />
+		<link rel="stylesheet" href="/htdocs/styles.css" />
 		$if 'title' in kwargs:
 			<title>$kwargs['title'] &mdash; DCNet</title>
 		$else:
 			<title>DCNet</title>
 		$for script in kwargs.get('scripts', []):
-			<script language="javascript" src="htdocs/$script"></script>
-		<script language="javascript" src="htdocs/dcn.js"></script>
+			<script language="javascript" src="/htdocs/$script"></script>
+		<script language="javascript" src="/htdocs/dcn.js"></script>
 	</head>
 	<body onload="$kwargs.get('onload', '')">
 		$:kwargs.get('toolbar', '')
