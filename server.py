@@ -25,6 +25,7 @@ urls=(
 	'/user/(.+)', 'User',
 	'/chan/(.+)', 'Chan',
 	'/item/([^/]+)/([^/]+)', 'Item',
+	'/new/([^/]+)/(.+)', 'Create',
 	'/selftest', 'SelfTest'
 )
 
@@ -157,6 +158,14 @@ def wrap_exceptions(handler):
 			return resp(404, text='Not Found: %s' % x)
 	return safe_handler
 			
+
+def type_registered(itype):
+	if itype in ['int', 'string', 'real']:
+		return True
+	
+	# Check node home
+	raise NotImplementedError('Check node home for registered types')
+
 def chan_exists(cid):
 	if cid in ['.users', '.chans', '.nodes']:
 		return True
@@ -332,12 +341,43 @@ class Item:
 		ndata=json.loads(db[cid][iid]['jndata'])
 		data=json.loads(ndata['jdata'])
 		meta={
-			'uid': data['uid']
+			'uid': data['uid'],
+			'val_type': type(val)
 		}
 		print "NDATA", ndata
 		return render.page(render.item(cid, iid, val, meta),
 			width="80%",
 			toolbar=render.toolbar(render, get_userinfo(uid)))
+
+def get_item_constructor(itype):
+	if itype=='int':
+		return render.create_int()
+	else:
+		raise NotImplementedError('Item type not supported: %s' \
+			% itype)
+
+class Create:
+	@wrap_exceptions
+	def GET(self, cid, item_type):
+		uid=web.input().get('self')
+		if not chan_exists(cid):
+			return render.page(render.error('Not Found',
+				'Channel not found: %s' % cid),
+				width="80%",
+				toolbar=render.toolbar(render, get_userinfo(uid)),
+				title='Not Found')
+
+		if not type_registered(item_type):
+			return render.page(render.error('Not Found',
+				'Type not found: %s' % item_type),
+				width="80%",
+				toolbar=render.toolbar(render, get_userinfo(uid)),
+				title='Not Found')
+
+		return render.page(get_item_constructor(item_type),
+			width="80%",
+			toolbar=render.toolbar(render, get_userinfo(uid)))
+
 
 class User:
 	@wrap_exceptions

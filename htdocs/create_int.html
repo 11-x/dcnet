@@ -1,0 +1,15 @@
+$def with()
+<script language="javascript">
+function submit_int()
+{
+	let el=document.getElementById("int_value");
+	if (/^[0-9]+$$/.test(el.value)==false) {
+		alert("Not an integer: " + el.value);
+		return;
+	}
+	let val=parseInt(el.value);
+	console.log('SUBMIT:', val);
+}
+</script>
+integer: <input id="int_value" type="text" pattern="/[0-9]+/"
+	placeholder="enter integer" /><button onclick="submit_int();">OK</button>

@@ -3,5 +3,8 @@ item owner: $meta['uid']<br/>
 channel: $cid<br/>
 iid: $iid<br/>
 <hr/>
-$for k, v in val.iteritems():
-	$k = $v <br/>
+$if meta['val_type']==dict:
+	$for k, v in val.iteritems():
+		$k = $v <br/>
+$else:
+	value: $val

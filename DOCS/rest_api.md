@@ -156,7 +156,19 @@ Node descriptor:
 
 	{
 		"pub_key": "<pub_key>",
-		"nodename": "<nodename>" // optional
+		"nodename": "<nodename>", // optional,
+		"home": "<cid>" // node home channel, optional
+	}
+
+Type descriptor:
+
+Type descriptors are placed in node home channel
+
+	{
+		"type": "type_descriptor",
+		"typename": "<type name>", // unique within its channel
+		"editor_type": "html" | ...,
+		"editor_html": "<html>" // for 'html' editor type
 	}
 
 Streaming API: TODO
@@ -177,6 +189,10 @@ storage (with private keys to decode encrypted data)
 `/chan/<cid>?self=<uid>` - browse channel
 
 `/item/<cid>/<iid>?self=<uid>` - inspect item
+
+`/new/<cid>/<item_type>?self=<uid>` - create an item into
+	the channel using type-specific form. Type forms are defined with
+	type descriptors. Item type must be registered at the node.
 
 Node implementation recommendations
 -----------------------------------

@@ -50,3 +50,46 @@ Example of a filled form
 	}
 }
 
+
+Dream Log Entry Form Specification Item
+=======================================
+
+	"<id>": {
+		"type": "form",
+		"name": "Dream Log Entry",
+		"final": true
+		"encrypt": "prompt",
+		"fields": [
+			{
+				"name": "dream_title",
+				"caption": "title",
+				"type": "string",
+				"min_length": 2,
+				"max_length": 1000,
+				"multiline": false,
+				"mandatory": false
+			},
+			{
+				"caption": "description",
+				"type": "htext",
+				"mandatory": false
+			},
+			{
+				"caption": "schemas",
+				"type": "array",
+				"mandatory": false,
+				"element": {
+					"type": "reference",
+					"conformance": ["drawing"]
+				}
+			},
+			{
+				"caption": "tags",
+				"type": "array",
+				"element": {
+					"type": "reference",
+					"conformance": ["<dream/tag+?-/ref>"]
+				}
+			}
+		]
+	}
