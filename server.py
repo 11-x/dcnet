@@ -351,7 +351,7 @@ class Item:
 
 def get_item_constructor(itype):
 	if itype=='int':
-		return render.create_int()
+		return render.edit_int(None)
 	else:
 		raise NotImplementedError('Item type not supported: %s' \
 			% itype)
