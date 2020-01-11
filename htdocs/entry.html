@@ -1,0 +1,40 @@
+<html>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="Content-Type"
+		content="text/html;charset=UTF-8" />
+	<head>
+		<title>DCNet &#8212; Вход</title>
+		<script language="javascript" src="../../dcn.js"></script>
+		<script language="javascript" src="plain.js"></script>
+		<script language="javascript" src="entry.js"></script>
+		<link rel="stylesheet" type="text/css" href="white.css" />
+	</head>
+	<body onload="body_onload();">
+		<div id="body_content">
+			<p><a href="/" class="logo">DCNet</a></p>
+			<p><input
+				id="username"
+				placeholder="username"
+				autocomplete="off"
+				autocapitalize="off"
+				onkeypress="input_keypressed();"
+			/></p>
+			<p><input
+				placeholder="pass"
+				id="pass"
+				type="password"
+				onkeypress="input_keypressed();"
+			/></p>
+			<p><button
+				id="login_btn"
+				onclick="login_btn_clicked();"
+			>Войти</button></p>
+			<p><a href="register.html"
+				>Зарегистрироваться</a></p>
+			<p><a href="readme.html"
+				>Что это за место?</a></p>
+			<p><a href="#" onclick="forget()"
+				>Забыть меня</a></p>
+		</div>
+	</body>
+</html>

@@ -10,10 +10,33 @@ const config=require('./config.js');
 
 function serve(req, res)
 {
-	console.log(req);
+	console.log(req.method, req.url);
 
-	res.writeHead(501);
-	res.end("DCNet: under construction");
+	try {
+		if (req.url=='/') {
+			res.writeHead(200, {
+				'Content-type': 'text/html; charset=utf-8'
+			});
+
+			res.end(fs.readFileSync('htdocs/default.html'));
+			return;
+		} else if (req.url.startsWith("/htdocs/")
+				&& (req.url.endsWith(".js")
+					|| req.url.endsWith(".html"))) {
+			assert(req.url.indexOf("..")==-1);
+			res.writeHead(200, {
+				'Content-type': 'application/javascript; charset=utf-8'
+			});
+
+			res.end(fs.readFileSync(req.url.slice(1)));
+			return;
+		}
+
+		res.writeHead(404);
+		res.end();
+	} finally {
+		console.log(res.statusCode, res.statusMessage);
+	}
 }
 
 function main()
