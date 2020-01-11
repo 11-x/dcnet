@@ -24,11 +24,18 @@ function serve(req, res)
 				&& (req.url.endsWith(".js")
 					|| req.url.endsWith(".html"))) {
 			assert(req.url.indexOf("..")==-1);
-			res.writeHead(200, {
-				'Content-type': 'application/javascript; charset=utf-8'
-			});
+			try {
+				let content=fs.readFileSync(req.url.slice(1));
 
-			res.end(fs.readFileSync(req.url.slice(1)));
+				res.writeHead(200, {
+					'Content-type': 'application/javascript; charset=utf-8'
+				});
+
+				res.end(content);
+			} catch (err) {
+				res.writeHead(404);
+				res.end();
+			}
 			return;
 		}
 

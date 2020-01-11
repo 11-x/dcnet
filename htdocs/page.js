@@ -25,18 +25,36 @@ class Page
 		this.head.innerHTML='';
 		this.body.innerHTML='';
 
-		this.require(target);
-		this.body.innerHTML=(await node.request("GET", "htdocs/" + target 
-			+ ".html")).data;
+		let resp=await node.request("GET", "htdocs/" + target 
+			+ ".html");
+
+		if (resp.code==404) {
+			console.error(resp);
+			this.body.innerHTML='404 Not Found';
+			return;
+		} else if (resp.code!=200) {
+			console.error(resp);
+			return;
+		}
+
+		this.body.innerHTML=resp.data;
+
+		await this.require(target);
 
 		if (typeof page_loaded=="function")
 			await page_loaded();
 	}
 
 	async require(target) {
+		let resp=await node.request("GET", "htdocs/" + target + ".js");
+
+		if (resp.code!=200) {
+			console.warn(resp);
+			return;
+		}
+
 		let script=document.createElement("script");
-		script.innerHTML=(await node.request("GET", "htdocs/" + target
-			+ ".js")).data;
+		script.innerHTML=resp.data;
 		page.head.appendChild(script);
 	}
 }

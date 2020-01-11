@@ -1,6 +1,10 @@
 class Auth {
+	get username() {
+		return localStorage.username;
+	}
+
 	is_logged_in() {
-		return false;
+		return 'privkey' in localStorage;
 	}
 }
 

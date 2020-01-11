@@ -1,4 +1,8 @@
 class Node {
+	constructor() {
+		this._db={};
+	}
+
 	// callback-based request
 	_request_cb(method, url, data, cb, cb_err)
 	{
@@ -51,6 +55,26 @@ class Node {
 				reject(xhr);
 			});
 		});
+	}
+
+	async sync(chan, query)
+	{
+		let url="/j/" + chan;
+
+		if (typeof query!="undefined") {
+			url+='?query=' + encodeURIComponent(JSON.stringify(query));
+		}
+
+		let resp=await node.request("GET", url);
+
+		if (resp.code != 200) {
+			console.error(resp);
+			throw "fetch failed";
+		}
+
+		for (let key in resp.data) {
+			this._db[chan][key]=resp.data[key];
+		}
 	}
 }
 
