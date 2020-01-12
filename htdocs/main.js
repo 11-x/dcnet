@@ -1,11 +1,10 @@
 function main()
 {
-	if (!auth.is_logged_in()) {
-		page.go('gate');
+	if (location.pathname=='/') {
+		if (!auth.is_logged_in()) {
+			page.go('gate');
+		}
+	} else {
+		page.go(location.pathname.slice(1));
 	}
-	// Algorithm:
-	// 0. Asynchronously
-	// 2. If the user is not logged in, load and pass to login screen
-	// 3. Else pass to home screen.
-//	console.log("main loaded");
 }

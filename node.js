@@ -13,7 +13,9 @@ function serve(req, res)
 	console.log(req.method, req.url);
 
 	try {
-		if (req.url=='/') {
+		let is_simple_target=(req.url.slice(1).indexOf('/')==-1);
+
+		if (is_simple_target) {
 			res.writeHead(200, {
 				'Content-type': 'text/html; charset=utf-8'
 			});
@@ -37,6 +39,9 @@ function serve(req, res)
 				res.end();
 			}
 			return;
+		} else {
+			res.writeHead(400);
+			res.end();
 		}
 
 		res.writeHead(404);
