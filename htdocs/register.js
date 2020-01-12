@@ -1,3 +1,9 @@
+function register_loaded()
+{
+	arrange('body_content', 200);
+}
+
+
 async function register_btn_clicked()
 {
 	var btn=document.getElementById("register_btn");

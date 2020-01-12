@@ -1,4 +1,4 @@
-function page_loaded()
+function gate_loaded()
 {
 	arrange('body_content', 200);
 
@@ -18,7 +18,6 @@ function page_loaded()
 	} else {
 		node.sync('.users');
 	}
-
 }
 
 function login_btn_clicked()

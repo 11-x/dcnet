@@ -8,18 +8,20 @@ class Page
 				console.error("why no e.state?", e);
 			}
 		};
+
+		this._target=null;
+		this._targets_cache={};
 	}
 
 	async close() {
-		if (typeof page_closing=="function")
-			await page_closing();
+		if (this._target) {
+			let closing=window[this._target+'_closing'];
 
-		this.head.innerHTML='';
-		this.body.innerHTML='';
-
-		for (let i in this.imported) {
-			window[this.imported[i]]=undefined;
+			if (typeof closing=="function")
+				await closing();
 		}
+
+		this.body.innerHTML='';
 	}
 
 	get body() {
@@ -31,23 +33,21 @@ class Page
 		return this._body;
 	}
 
-	get head() {
-		if (typeof this._head=="undefined") {
-			this._head=document.createElement("div");
-			document.getElementsByTagName("head")[0].appendChild(
-				this._head);
-		}
-		return this._head;
+	async fetch(target) {
+		if (!(target in this._targets_cache))
+			this._targets_cache[target]=await node.request("GET",
+				"htdocs/" + target + ".html");
+
+		return this._targets_cache[target];
 	}
 
 	async go(target, set_new_state) {
 		if (typeof set_new_state=="undefined")
 			set_new_state=true;
 
-		await this.close();
+		let resp=await this.fetch(target);
 
-		let resp=await node.request("GET", "htdocs/" + target 
-			+ ".html");
+		await this.close();
 
 		if (resp.code==404) {
 			console.error(resp);
@@ -60,43 +60,13 @@ class Page
 
 		this.body.innerHTML=resp.data;
 
-		await this.require(target);
-
 		if (set_new_state)
 			window.history.pushState(target, target, target);
 
-		if (typeof page_loaded=="function")
-			await page_loaded();
-	}
+		if (typeof window[target+'_loaded']=="function")
+			await window[target+'_loaded']();
 
-	async require(target) {
-		let resp=await node.request("GET", "htdocs/" + target + ".js");
-
-		if (resp.code!=200) {
-			console.warn(resp);
-			return;
-		}
-
-		let known_globals={};
-
-		for (let key in window) {
-			if (typeof key!="undefined")
-				known_globals[key]=window[key];
-		}
-
-		let script=document.createElement("script");
-		script.innerHTML=resp.data;
-		page.head.appendChild(script);
-
-		this.imported=[];
-
-		for (let key in window) {
-			if (!(key in known_globals)) {
-				this.imported.push(key);
-			} else if (known_globals[key]!=window[key]) {
-				throw "global key redefined: " + key;
-			}
-		}
+		this._target=target;
 	}
 }
 
