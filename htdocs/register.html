@@ -1,18 +1,52 @@
 <div id="body_content">
-	<p><a href="/" class="logo">DCNet</a>: Регистрация</p>
-	<p><input id="user" placeholder="username"
-		autocomplete="off" autocapitalize="off"
-		/></p>
-	<p><input id="pass" type="password"
-		placeholder="pass"/></p>
-	<p><input id="pass2" type="password"
-		placeholder="confirm pass"/></p>
-	<i>Важно: пароль нельзя восстановить (на сервере он
-	не хранится). При утере пароля
-	все защищённые данные станут недоступны.</i>
-	<p><button
-		id="register_btn"
-		onclick="register_btn_clicked();"
-	>Зарегистрироваться</button></p>
-	<a href="/">Отменить</a>
+	<p><table>
+		<tr><td align="center" colspan="2">
+			<a href="/" class="logo">DCNet</a>: Регистрация
+		</td></tr>
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr valign="center">
+			<td align="right">
+				Имя пользователя:
+			</td>
+			<td>
+				<input id="user" placeholder="username"
+				autocomplete="off" autocapitalize="off"/>
+			</td>
+		</tr>
+		<tr valign="center">
+			<td align="right">
+				Пароль:
+			</td>
+			<td>
+				<input id="pass" type="password"
+				placeholder="pass"/>
+			</td>
+		</tr>
+		<tr valign="center">
+			<td align="right">
+				Ещё раз пароль:
+			</td>
+			<td>
+				<input id="pass2" type="password"
+				placeholder="confirm pass"/></p>
+			</td>
+		</tr>
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2">
+				<i>Важно: пароль нельзя восстановить (на сервере он
+				не хранится). При утере пароля
+				все защищённые данные станут недоступны.</i>
+			</td>
+		</tr>
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2" align="center">
+				<button id="register_btn"
+					onclick="register_btn_clicked();"
+				>Зарегистрироваться</button>
+				<a href="/">Отменить</a>
+			</td>
+		</tr>
+	</table></p><p>&nbsp;</p>
 </div>
