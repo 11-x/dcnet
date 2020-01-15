@@ -1,6 +1,8 @@
 function register_loaded()
 {
 	arrange('body_content', 200);
+
+	document.getElementById("user").focus();
 }
 
 
@@ -25,6 +27,8 @@ async function register_btn_clicked()
 	btn.disabled=true;
 
 	let err=await node.register(user, pass);
+
+	console.log(err);
 
 	if (err) {
 	} else {

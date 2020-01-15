@@ -76,6 +76,17 @@ class Node {
 			this._db[chan][key]=resp.data[key];
 		}
 	}
+
+	async register(username, pass)
+	{
+		// Generate p rivate key
+		// Encrypt pr ivkey=>ppi by pass
+		// Create and post user descriptor into chans
+		// Store into localstorage the info on success
+		// Sugg sugge st dreams import from dcnet_1
+		// fwd to hom e
+		throw new Error('not implemented');
+	}
 }
 
 var node=new Node();
