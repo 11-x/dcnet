@@ -1,6 +1,6 @@
 function register_loaded()
 {
-	arrange('body_content', 400);
+	arrange('body_content', 200);
 }
 
 
