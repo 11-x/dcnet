@@ -79,13 +79,42 @@ class Node {
 
 	async register(username, pass)
 	{
-		// Generate p rivate key
-		// Encrypt pr ivkey=>ppi by pass
+		// Generate private key
+		// Encrypt privkey=>ppi by pass
 		// Create and post user descriptor into chans
 		// Store into localstorage the info on success
-		// Sugg sugge st dreams import from dcnet_1
-		// fwd to hom e
-		throw new Error('not implemented');
+		// Sugg suggest dreams import from dcnet_1
+		// fwd to home
+		console.log('here');
+		let keypair=await crypt.gen_keypair();
+		
+		let privkey_ppi=await crypt.encrypt(
+			JSON.stringify(keypair.private_key), pass);
+
+		let user_descr={
+			pub_key: keypair.public_key,
+			priv_key: privkey_ppi,
+			username: username
+		};
+
+		let jdata=JSON.stringify({
+			cid: '.users',
+			val: user_descr
+		});
+
+		let res=await this.request("POST", "/j/.users", JSON.stringify({
+			jdata: jdata,
+			usig: await crypt.sign(jdata, keypair.private_key)
+		}));
+
+		console.log(res);
+
+		if (res.code==201) {
+			return res.data; // user_id
+		} else {
+			console.error('user registration failed', res);
+			throw new Error('User registration failed');
+		}
 	}
 }
 
