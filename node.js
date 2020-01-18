@@ -6,6 +6,7 @@ const fs=require('fs');
 const assert=require('assert');
 const https=require('https');
 
+const crypt=require('./crypt.js');
 const config=require('./config.js');
 
 function respond(resp, code, reason, data, headers)
@@ -70,6 +71,14 @@ async function get_json(req)
 async function POST_users(res, user_descr)
 {
 	console.log('create user:', user_descr);
+
+	let data=JSON.parse(user_descr.jdata);
+	let user_pubkey=data.val.pub_key;
+
+	if (!crypt.verify(user_descr.jdata, user_pubkey, user_descr.usig)) {
+		return respond(res, 403, 'Invalid Signature');
+	}
+
 	respond(res, 501);
 
 	// verify user signature
