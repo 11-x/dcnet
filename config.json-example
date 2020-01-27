@@ -1,0 +1,9 @@
+{
+	"config_version": "1",
+	"server_port": 1443,
+	"node_name": "My Awesome Node",
+	"log_path": "stream.log",
+	"node_privkey_path": "./path/to/node/privkey",
+	"https_cert_path": "./path/to/https/cert.pem",
+	"https_privkey_path": "./path/to/https/privkey.pem"
+}

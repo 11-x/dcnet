@@ -1,6 +1,18 @@
 Dreams Cartography Network Node
 ===============================
 
+Quick start guide
+-----------------
+
+* Generate node identity key and obtain https key/certificate (see 
+Keys and certificates generation section for info)
+* Rename config.json-example into config.json and set up its contents
+(see Configuration file section for help)
+* Run `nodejs node.js`
+* Connect to https://localhost:1443 (or whatever port is specified in
+`config.json`) in browser
+
+
 Configuration file
 ------------------
 
