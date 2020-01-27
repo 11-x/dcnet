@@ -107,7 +107,12 @@ function serve(req, res)
 
 	let is_simple_target=(req.url.slice(1).indexOf('/')==-1);
 
-	if (is_simple_target) {
+	if (req.url=='/test/cryptography') {
+		return respond(res, 200, 'OK',
+			fs.readFileSync('test/cryptography_browser.html'), {
+			'Content-type': 'text/html; charset=utf-8'
+		});
+	} else if (is_simple_target) {
 		return respond(res, 200, 'OK',
 			fs.readFileSync('htdocs/default.html'), {
 			'Content-type': 'text/html; charset=utf-8'

@@ -12,11 +12,22 @@ class Crypt
 				namedCurve: "P-256"
 			},
 			true, ["sign"]);
+
+		console.log('PRIVKEY', privkey);
 		
 		let signature=await crypto.subtle.sign({
 			name: "ECDSA",
 			hash: "SHA-256"
 		}, privkey, this.str2ab(str));
+
+		console.log('SIGNATURE', signature);
+
+		signature=await crypto.subtle.sign({
+			name: "ECDSA",
+			hash: "SHA-256"
+		}, privkey, this.str2ab(str));
+
+		console.log('SIGNATURE', signature);
 
 		return this.ab2b64(signature);
 	}
@@ -32,6 +43,13 @@ class Crypt
 			bin_str += String.fromCharCode(ui[i]);
 		}
 		return btoa(bin_str);
+	}
+
+	hex2ab(hex)
+	{
+		return new Uint8Array(hex.match(/[\da-f]{2}/gi).map(function (h) {
+			return parseInt(h, 16);
+		}));
 	}
 
 	/**
