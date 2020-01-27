@@ -4,7 +4,7 @@ const assert=require('assert');
 function load_config(path)
 {
 	if (!fs.existsSync(path)) {
-		abort('no config file (' + path 
+		throw('no config file (' + path 
 			+ '); see the README for setup notes');
 	}
 
