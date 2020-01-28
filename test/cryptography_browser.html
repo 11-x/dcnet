@@ -19,7 +19,11 @@ async function sign_in_browser()
 	let privkey=document.getElementById("privkey").value;
 	let sign=await crypt.sign(text, privkey);
 	console.log(text, privkey, sign);
-	document.getElementById("browser_sig_crypt").value=sign;
+	document.getElementById("signature").value=sign;
+
+	let pubkey=document.getElementById("pubkey").value;
+	document.getElementById("verification").value=
+		await crypt.verify_sign(text, pubkey, sign);
 }
 		</script>
 	</head>
@@ -43,20 +47,12 @@ async function sign_in_browser()
 		<p>
 			<button onclick="sign_in_browser();">sign in browser</button>
 			<br>
-			browser_sig_crypt:
-			<textarea id="browser_sig_crypt"
+			signature:
+			<textarea id="signature"
 				style="height: 80; width: 400"></textarea><br/>
 			<br>
-			node_sig_crypt:
-			<textarea id="der_sig_crypt"
-				style="height: 80; width: 400"></textarea><br/>
-			<br>
-			browser_sig_raw:
-			<textarea id="browser_sig_raw"
-				style="height: 80; width: 400"></textarea><br/>
-			<br>
-			node_sig_raw:
-			<textarea id="der_sig_raw"
+			verification:
+			<textarea id="verification"
 				style="height: 80; width: 400"></textarea><br/>
 		</p>
 	</body>

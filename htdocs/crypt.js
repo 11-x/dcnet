@@ -18,6 +18,8 @@ class Crypt
 			hash: "SHA-256"
 		}, privkey, this.str2ab(str));
 
+//		return this.ab2b64(signature);
+
 		console.log('IEEE', this.ab2b64(signature));
 
 		// Convert signature from IEEE to DER format
