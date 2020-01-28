@@ -13,23 +13,57 @@ class Crypt
 			},
 			true, ["sign"]);
 
-		console.log('PRIVKEY', privkey);
-		
 		let signature=await crypto.subtle.sign({
 			name: "ECDSA",
 			hash: "SHA-256"
 		}, privkey, this.str2ab(str));
 
-		console.log('SIGNATURE', signature);
+		console.log('IEEE', this.ab2b64(signature));
 
-		signature=await crypto.subtle.sign({
-			name: "ECDSA",
-			hash: "SHA-256"
-		}, privkey, this.str2ab(str));
+		// Convert signature from IEEE to DER format
 
-		console.log('SIGNATURE', signature);
+		signature = new Uint8Array(signature);
 
-		return this.ab2b64(signature);
+		// Extract r & s and format it in ASN1 format.
+		var signHex = Array.prototype.map.call(signature,
+				function(x) {
+					return ('00' + x.toString(16)).slice(-2); }).join(''),
+			r = signHex.substring(0, 96),
+			s = signHex.substring(96),
+			rPre = true,
+			sPre = true;
+
+		console.log('R', r);
+		console.log('S', s);
+
+		while(r.indexOf('00') === 0) {
+		  r = r.substring(2);
+		  rPre = false;
+		}
+
+		if (rPre && parseInt(r.substring(0, 2), 16) > 127) {
+		  r = '00' + r;
+		}
+
+		while(s.indexOf('00') === 0) {
+		  s = s.substring(2);
+		  sPre = false;
+		}
+
+		if(sPre && parseInt(s.substring(0, 2), 16) > 127) {
+		  s = '00' + s;
+		}
+
+		let length=function (hex) {
+			return ('00' 
+				+ (hex.length / 2).toString(16)).slice(-2).toString();
+		}
+
+		var payload = '02' + length(r) + r +
+					  '02' + length(s) + s,
+			der = '30' + length(payload) + payload;
+		
+		return this.ab2b64(this.hex2ab(der));
 	}
 
 	/**

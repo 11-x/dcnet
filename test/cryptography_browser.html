@@ -7,6 +7,11 @@ async function gen_keypair()
 	let keypair=await crypt.gen_keypair();
 	document.getElementById("pubkey").value=keypair.public_key;
 	document.getElementById("privkey").value=keypair.private_key;
+	console.log('-----BEGIN PUBLIC KEY-----\n'
+		+ keypair.public_key + '\n-----END PUBLIC KEY-----');
+	console.log('-----BEGIN EC PRIVATE KEY-----'
+		+ keypair.private_key + '-\n----END EC PRIVATE KEY-----');
+
 }
 async function sign_in_browser()
 {
@@ -15,65 +20,6 @@ async function sign_in_browser()
 	let sign=await crypt.sign(text, privkey);
 	console.log(text, privkey, sign);
 	document.getElementById("browser_sig_crypt").value=sign;
-
-	let digest=new TextEncoder('utf-8').encode(text);
-		privkey=await crypto.subtle.importKey('pkcs8',
-			crypt.b642ab(privkey),
-			{
-				name: "ECDSA",
-				namedCurve: "P-256"
-			},
-			true, ["sign"]);
-	sign=await window.crypto.subtle.sign({
-		name: "ECDSA", hash: {name: "SHA-256"}
-	}, privkey, digest);
-	sign=crypt.ab2b64(sign);
-	//console.log(sign);
-	document.getElementById("browser_sig_raw").value=sign;
-
-	document.getElementById("der_sig_crypt").value=
-		await sig_to_der(document.getElementById("browser_sig_crypt").value);
-	document.getElementById("der_sig_raw").value=
-		await sig_to_der(document.getElementById("browser_sig_raw").value);
-}
-function length(hex) {
-        return ('00' + (hex.length / 2).toString(16)).slice(-2).toString();
-		      }
-async function sig_to_der(sign)
-{
-	let signature = new Uint8Array(crypt.b642ab(sign));
-
-	// Extract r & s and format it in ASN1 format.
-	var signHex = Array.prototype.map.call(signature, function(x) { return ('00' + x.toString(16)).slice(-2); }).join(''),
-		r = signHex.substring(0, 96),
-		s = signHex.substring(96),
-		rPre = true,
-		sPre = true;
-
-	while(r.indexOf('00') === 0) {
-	  r = r.substring(2);
-	  rPre = false;
-	}
-
-	if (rPre && parseInt(r.substring(0, 2), 16) > 127) {
-	  r = '00' + r;
-	}
-
-	while(s.indexOf('00') === 0) {
-	  s = s.substring(2);
-	  sPre = false;
-	}
-
-	if(sPre && parseInt(s.substring(0, 2), 16) > 127) {
-	  s = '00' + s;
-	}
-
-	var payload = '02' + length(r) + r +
-				  '02' + length(s) + s,
-		der = '30' + length(payload) + payload;
-	
-	der=crypt.ab2b64(crypt.hex2ab(der));
-	return der;
 }
 		</script>
 	</head>
