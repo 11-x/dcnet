@@ -5,6 +5,7 @@ class Crypt
 	 */
 	async sign(str, priv64)
 	{
+		console.log('signing string', this.str2ab(str));
 		let privkey=await crypto.subtle.importKey('pkcs8',
 			this.b642ab(priv64),
 			{
@@ -18,20 +19,18 @@ class Crypt
 			hash: "SHA-256"
 		}, privkey, this.str2ab(str));
 
-//		return this.ab2b64(signature);
+		return this.ab2b64(signature);
+	}
 
-		console.log('IEEE', this.ab2b64(signature));
-
-		// Convert signature from IEEE to DER format
-
-		signature = new Uint8Array(signature);
+	ieee2der(signature_b64) {
+		let signature = new Uint8Array(this.b642ab(signature_b64));
 
 		// Extract r & s and format it in ASN1 format.
 		var signHex = Array.prototype.map.call(signature,
 				function(x) {
 					return ('00' + x.toString(16)).slice(-2); }).join(''),
-			r = signHex.substring(0, 96),
-			s = signHex.substring(96),
+			r = signHex.substring(0, 64),
+			s = signHex.substring(64),
 			rPre = true,
 			sPre = true;
 

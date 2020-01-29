@@ -20,10 +20,13 @@ async function sign_in_browser()
 	let sign=await crypt.sign(text, privkey);
 	console.log(text, privkey, sign);
 	document.getElementById("signature").value=sign;
+	document.getElementById("conv_signature").value=crypt.ieee2der(sign);
+	
 
 	let pubkey=document.getElementById("pubkey").value;
 	document.getElementById("verification").value=
 		await crypt.verify_sign(text, pubkey, sign);
+	
 }
 		</script>
 	</head>
@@ -49,6 +52,10 @@ async function sign_in_browser()
 			<br>
 			signature:
 			<textarea id="signature"
+				style="height: 80; width: 400"></textarea><br/>
+			<br>
+			converted signature:
+			<textarea id="conv_signature"
 				style="height: 80; width: 400"></textarea><br/>
 			<br>
 			verification:
