@@ -1,3 +1,4 @@
+// TODO replace most asserts with proper error handling
 const CONFIG_PATH='config.json';
 
 const VERSION='0.3.0.1';
@@ -107,10 +108,18 @@ function serve(req, res)
 
 	let is_simple_target=(req.url.slice(1).indexOf('/')==-1);
 
-	if (req.url=='/test/cryptography') {
+	if (req.url=='/selftest') {
 		return respond(res, 200, 'OK',
-			fs.readFileSync('test/cryptography_browser.html'), {
+			fs.readFileSync('test/test.html'), {
 			'Content-type': 'text/html; charset=utf-8'
+		});
+	} else if (req.url.startsWith("/test/") && req.url.endsWith(".js")) {
+		assert(req.url.indexOf("..")==-1);
+		// TODO check file existense
+		return respond(res, 200, 'OK',
+			fs.readFileSync(req.url.slice(1)), {
+				'Content-type':
+					'application/javascript; charset=utf-8'
 		});
 	} else if (is_simple_target) {
 		return respond(res, 200, 'OK',
@@ -136,7 +145,7 @@ function serve(req, res)
 				return respond(res, 400, 'Bad Request');
 			}
 		} catch (err) {
-			return respond(404);
+			return respond(res, 404);
 		}
 	} else if (req.url.startsWith('/j/')) {
 		let url=parse_url(req.url);

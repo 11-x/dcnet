@@ -5,7 +5,6 @@ class Crypt
 	 */
 	async sign(str, priv64)
 	{
-		console.log('signing string', this.str2ab(str));
 		let privkey=await crypto.subtle.importKey('pkcs8',
 			this.b642ab(priv64),
 			{
@@ -283,7 +282,7 @@ class Crypt
 		let rnd=crypto.getRandomValues(new Uint8Array(16));
 		let rnd_string=this.ab2b64(rnd.buffer);
 		let signature=await this.sign(rnd_string, priv_key);
-		return await this.verify_sign(rnd_string, pub_key,
+		return await this.verify(rnd_string, pub_key,
 			signature);
 			
 	}
@@ -291,7 +290,7 @@ class Crypt
 	/**
 	 Verify signature
 	 */
-	async verify_sign(data_str, pubkey_b64, signature_b64)
+	async verify(data_str, pubkey_b64, signature_b64)
 	{
 		let signature=this.b642ab(signature_b64);
 		let pubkey=await crypto.subtle.importKey('spki',
