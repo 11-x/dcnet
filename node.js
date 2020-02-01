@@ -121,6 +121,25 @@ function serve(req, res)
 				'Content-type':
 					'application/javascript; charset=utf-8'
 		});
+	} else if (req.url.startsWith("/test/verify")) {
+		let url=parse_url(req.url);
+		let result=false;
+
+		try {
+			result=crypt.verify(url.query.data,
+				url.query.pubkey, url.query.signature);
+		} catch (err) {
+			result=false;
+		}
+		if (result) {
+			return respond(res, 200, 'OK', 'true', {
+				'Content-type': 'application/javascript; charset=utf-8'
+			});
+		} else {
+			return respond(res, 200, 'OK', 'false', {
+				'Content-type': 'application/javascript; charset=utf-8'
+			});
+		}
 	} else if (is_simple_target) {
 		return respond(res, 200, 'OK',
 			fs.readFileSync('htdocs/default.html'), {
@@ -151,7 +170,7 @@ function serve(req, res)
 		let url=parse_url(req.url);
 		return serve_api(req, res, url.tokens.slice(1), url.query);
 	} else {
-		return respond(404);
+		return respond(res, 404);
 	}
 }
 

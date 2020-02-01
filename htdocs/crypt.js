@@ -21,6 +21,24 @@ class Crypt
 		return this.ab2b64(signature);
 	}
 
+	wrap_pubkey(pubkey_b64) {
+		const start_line='-----BEGIN PUBLIC KEY-----';
+		const end_line='-----END PUBLIC KEY-----';
+
+		if (pubkey_b64.startsWith(start_line))
+			throw "invalid key format";
+
+		let res='';
+
+		while (pubkey_b64) {
+			let slice=pubkey_b64.slice(0, 64);
+			pubkey_b64=pubkey_b64.slice(64);
+			res+=slice + '\n';
+		}
+
+		return start_line + '\n' + res + end_line
+	}
+
 	ieee2der(signature_b64) {
 		let signature = new Uint8Array(this.b642ab(signature_b64));
 
@@ -32,9 +50,6 @@ class Crypt
 			s = signHex.substring(64),
 			rPre = true,
 			sPre = true;
-
-		console.log('R', r);
-		console.log('S', s);
 
 		while(r.indexOf('00') === 0) {
 		  r = r.substring(2);
