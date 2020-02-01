@@ -140,6 +140,18 @@ function serve(req, res)
 				'Content-type': 'application/javascript; charset=utf-8'
 			});
 		}
+	} else if (req.url=="/test/sign") {
+		let keypair=crypt.gen_keypair();
+		let test_data='test data';
+		let signature=crypt.sign(test_data, keypair.private_key);
+		return respond(res, 200, 'OK', JSON.stringify({
+			data: test_data,
+			pubkey: keypair.public_key,
+			signature: signature
+		}), {
+			'Content-type': 'application/javascript; charset=utf-8'
+		});
+		return respond(res, 501, 'Not Implemented');
 	} else if (is_simple_target) {
 		return respond(res, 200, 'OK',
 			fs.readFileSync('htdocs/default.html'), {

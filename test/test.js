@@ -9,16 +9,20 @@ class Tester
 		this._result=undefined;
 	}
 
-	report(success) {
+	report(success, err) {
 		success=Boolean(success);
 		if (typeof this._result!="undefined") {
 			this._result='rereported';
 		} else {
 			this._result=success;
+			if (typeof err!="undefined")
+				this._err=err;
 		}
 	}
 
 	get result() { return this._result; }
+
+	get error() { return this._err; }
 
 	get is_ok() {
 		return Boolean(this._result);
@@ -54,8 +58,10 @@ async function run_test(func) {
 			console.error("TEST FAILED (final status rereported):",
 				func.name);
 		} else if (!tester.is_ok) {
-			_tests_failed.push([func.name, "final status: err"]);
-			console.error("TEST FAILED (final status: error)");
+			_tests_failed.push([func.name, "final status: err",
+				tester.error]);
+			console.error("TEST FAILED (final status: error):",
+				tester.error);
 		} else {
 			_tests_passed.push(func.name);
 			console.log("TEST PASSED", func.name);
@@ -74,7 +80,10 @@ async function test() {
 	if (_tests_failed.length) {
 		console.error("Testing done; failed:",
 			_tests_failed.length, "of", total);
+		document.wrtie('Testing done; failed: '
+			+ _tests_failed.length + " of " + total);
 	} else {
 		console.log("All", total, "tests passed");
+		document.write('All ' + total + ' tests passed');
 	}
 }

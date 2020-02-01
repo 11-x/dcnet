@@ -21,6 +21,23 @@ class Crypt
 		return this.ab2b64(signature);
 	}
 
+	unwrap_pubkey(pubkey_b64) {
+		const start_line='-----BEGIN PUBLIC KEY-----\n';
+		const end_line='\n-----END PUBLIC KEY-----';
+
+		pubkey_b64=pubkey_b64.trim();
+
+		if (!pubkey_b64.startsWith(start_line)
+				|| !pubkey_b64.endsWith(end_line)) {
+			throw "invalid key format";
+		}
+
+		pubkey_b64=pubkey_b64.slice(start_line.length,
+			pubkey_b64.length-end_line.length);
+
+		return pubkey_b64.split('\n').join('');
+	}
+
 	wrap_pubkey(pubkey_b64) {
 		const start_line='-----BEGIN PUBLIC KEY-----';
 		const end_line='-----END PUBLIC KEY-----';
@@ -79,6 +96,62 @@ class Crypt
 			der = '30' + length(payload) + payload;
 		
 		return this.ab2b64(this.hex2ab(der));
+	}
+
+	der2ieee(sig_b64) {
+		let sig = new Uint8Array(this.b642ab(sig_b64));
+		let cur=0;
+
+		let expect=function(what) {
+			if (sig[cur]!=what) {
+				console.error(sig);
+				console.error('expected', what, 'at pos', cur, 'got',
+					sig[cur]);
+				throw "invalid format";
+			}
+			cur++;
+		}
+
+		expect(0x30);
+		expect(sig.length-2);
+		expect(0x02);
+
+		let r_len=sig[cur++];
+		let r=sig.slice(cur, cur+r_len);
+		cur+=r_len;
+
+		if (r.length==33) {
+			if (r[0]!=0)
+				throw "invalid format";
+			r=r.slice(1);
+		}
+
+		if (r.length!=32)
+			throw "invalid format";
+
+		expect(0x02);
+		let s_len=sig[cur++];
+		let s=sig.slice(cur);
+		cur+=s_len;
+
+		if (s.length==33) {
+			if (s[0]!=0)
+				throw "invalid format";
+			s=s.slice(1);
+		}
+
+		if (s.length!=32)
+			throw "invalid format";
+
+		if (cur!=sig.length)
+			throw 'invalid format';
+
+		let rs=new Uint8Array(r.length+s.length);
+		rs.set(r);
+		rs.set(s, r.length);
+
+		let result=this.ab2b64(rs);
+		return result;
 	}
 
 	/**
