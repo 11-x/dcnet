@@ -77,47 +77,6 @@ class Node {
 		}
 	}
 
-	async register(username, pass)
-	{
-		// Generate private key
-		// Encrypt privkey=>ppi by pass
-		// Create and post user descriptor into chans
-		// Store into localstorage the info on success
-		// Sugg suggest dreams import from dcnet_1
-		// fwd to home
-		let keypair=await crypt.gen_keypair();
-		
-		let privkey_ppi=await crypt.encrypt(
-			JSON.stringify(keypair.private_key), pass);
-
-		console.log(privkey_ppi);
-
-		let user_descr={
-			pub_key: crypt.wrap_pubkey(keypair.public_key),
-			priv_key: privkey_ppi,
-			username: username
-		};
-
-		let jdata=JSON.stringify({
-			cid: '.users',
-			val: user_descr
-		});
-
-		let res=await this.request("POST", "/j/.users", JSON.stringify({
-			jdata: jdata,
-			usig: crypt.ieee2der(await crypt.sign(jdata,
-				keypair.private_key))
-		}));
-
-		console.log('register response', res);
-
-		if (res.code==201) {
-			return res.data; // user_id
-		} else {
-			console.error('user registration failed', res);
-			throw new Error('User registration failed');
-		}
-	}
 }
 
 var node=new Node();

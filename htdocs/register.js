@@ -27,7 +27,7 @@ async function register_btn_clicked()
 	btn.disabled=true;
 
 	try {
-		let uid=await node.register(user, pass);
+		let uid=await auth.register(user, pass);
 
 		console.log('user registered:', uid);
 

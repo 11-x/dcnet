@@ -2,21 +2,21 @@ function gate_loaded()
 {
 	arrange('body_content', 200);
 
-	var el_username=document.getElementById('username');
-	var el_pass=document.getElementById('pass');
+	let el_username=document.getElementById('username');
+	let el_pass=document.getElementById('pass');
+	let el_login_btn=document.getElementById('login_btn');
 
 	el_username.focus();
 
 	if (auth.username) {
 		el_username.value=auth.username;
 		el_pass.focus();
-		node.sync('.users', {
-			val_filter: {
-				username: auth.username
-			}
-		});
-	} else {
-		node.sync('.users');
+	}
+
+	if (auth.pass) {
+		el_pass.value=auth.pass;
+		if (auth.username)
+			el_login_btn.focus();
 	}
 }
 

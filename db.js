@@ -32,7 +32,6 @@ function gen_id(filter, length, alphabeth, max_attempts) {
 		while (id.length<length)
 			id+=alphabeth[Math.floor(Math.random()*alphabeth.length)];
 		
-		console.log(id, filter(id));
 		if (filter(id))
 			return id;
 	}

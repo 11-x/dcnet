@@ -87,18 +87,28 @@ function check_user_descriptor(uid, udesc)
 	
 	if (!('pub_key' in udesc))
 		return false;
-	
+
 	// ensure pubkey either matches current state, or is unique
 	// among other users
-	let users=db.query_vals('.users', val => {
-		val.pub_key==udesc.pub_key;
-	});
+	let users=db.query_vals('.users', val => val.pub_key==udesc.pub_key);
 
 	if (typeof uid=="undefined") {
-		if (users.length)
+		if (Object.keys(users).length)
 			return false; // user with such pubkey exists
 	} else {
-		return Object.keys(users).length==1 && uid in users;
+		if (!(Object.keys(users).length==1 && uid in users))
+			return false;
+	}
+
+	// ensure username is unique among other users
+	users=db.query_vals('.users', val => val.username==udesc.username);
+
+	if (typeof uid=="undefined") {
+		if (Object.keys(users).length)
+			return false; // user with such username exists
+	} else {
+		if (!(Object.keys(users).length==1 && uid in users))
+			return false;
 	}
 
 	return true;
@@ -168,7 +178,7 @@ async function POST_chan(res, cid, ureq)
 
 async function serve_api(req, res, tokens, query)
 {
-	console.log(tokens, query);
+	//console.log(tokens, query);
 
 	if (req.method=="POST" && tokens.length==1) {
 		return await POST_chan(res, tokens[0], await get_json(req));
