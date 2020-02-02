@@ -85,14 +85,15 @@ class Node {
 		// Store into localstorage the info on success
 		// Sugg suggest dreams import from dcnet_1
 		// fwd to home
-		console.log('here');
 		let keypair=await crypt.gen_keypair();
 		
 		let privkey_ppi=await crypt.encrypt(
 			JSON.stringify(keypair.private_key), pass);
 
+		console.log(privkey_ppi);
+
 		let user_descr={
-			pub_key: keypair.public_key,
+			pub_key: crypt.wrap_pubkey(keypair.public_key),
 			priv_key: privkey_ppi,
 			username: username
 		};
@@ -104,10 +105,11 @@ class Node {
 
 		let res=await this.request("POST", "/j/.users", JSON.stringify({
 			jdata: jdata,
-			usig: await crypt.sign(jdata, keypair.private_key)
+			usig: crypt.ieee2der(await crypt.sign(jdata,
+				keypair.private_key))
 		}));
 
-		console.log(res);
+		console.log('register response', res);
 
 		if (res.code==201) {
 			return res.data; // user_id

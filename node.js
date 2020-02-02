@@ -9,6 +9,7 @@ const https=require('https');
 
 const crypt=require('./crypt.js');
 const config=require('./config.js');
+var db=require('./db.js');
 
 function respond(resp, code, reason, data, headers)
 {
@@ -69,34 +70,95 @@ async function get_json(req)
 	return JSON.parse(await get_data(req));
 }
 
-async function POST_users(res, user_descr)
+function can_create(cid, uid, perm)
 {
-	console.log('create user:', user_descr);
+	if (cid=='.users')
+		return true;
+	
+	throw "not implemented; can_create " + cid + " " + uid + " "
+		+ perm;
+}
 
-	let data=JSON.parse(user_descr.jdata);
-	let user_pubkey=data.val.pub_key;
+function check_user_descriptor(udesc)
+{
+	for (let key in udesc)
+		if (!['pub_key', 'priv_key', 'username', 'home'].includes(key))
+			return false;
+	
+	if (!('pub_key' in udesc))
+		return false;
+	
+	return true;
+}
 
-	if (!crypt.verify(user_descr.jdata, user_pubkey, user_descr.usig)) {
-		return respond(res, 403, 'Invalid Signature');
+function check_value(cid, uid, val)
+{
+	if (cid=='.users')
+		return check_user_descriptor(val);
+	return true;
+}
+
+async function POST_chan(res, cid, ureq)
+{
+	// Algorithm:
+	// Validate ureq structure
+	// Verify signature
+	// Check access rights
+	// Perform chan-specific checks
+	// Actually create
+
+	try {
+		for (let key in ureq)
+			if (['jdata', 'usig', 'perm'].includes(key)==false)
+				throw "Unexpected key: " + key;
+
+		let data=JSON.parse(ureq.jdata);
+
+		if (data.cid != cid)
+			throw "Invalid cid";
+
+		if (!crypt.verify(ureq.jdata, data.val.pub_key, ureq.usig))
+			throw "Invalid signature";
+
+		if (!('uid' in data) && !(cid=='.users'))
+			throw "uid required";
+
+		if (!can_create(cid, data.uid, ureq.perm))
+			return respond(res, 403, 'Not Authorized');
+
+		if (!check_value(cid, data.uid, data.val))
+			throw "Invalid value";
+
+		let iid=db.reserve(data.cid);
+
+		let ndata={
+			jdata: ureq.jdata,
+			usig: ureq.usig,
+			iid: iid
+		};
+
+		if ('perm' in ureq)
+			ndata.perm=ureq.perm;
+
+		let jndata=JSON.stringify(ndata);
+
+		db.init(data.cid, iid, {
+			jndata: jndata,
+			nsig: crypt.sign(jndata, conf.private_key)
+		});
+
+		return respond(res, 201, 'Item Created', iid);
+	} catch (err) {
+		return respond(res, 400, 'Bad Request', String(err));
 	}
-
-	respond(res, 501);
-
-	// verify user signature
-	// verify user descriptor
-	// reserve iid in .users
-	// fill jndata
-	// sign jndata
-	// put item to '.users'
-	// return iid
 }
 
 async function serve_api(req, res, tokens, query)
 {
 	console.log(tokens, query);
 
-	if (req.method=="POST" && tokens[0]=='.users' && tokens.length==1) {
-		return await POST_users(res, await get_json(req));
+	if (req.method=="POST" && tokens.length==1) {
+		return await POST_chan(res, tokens[0], await get_json(req));
 	}
 
 	respond(res, 501, 'Not Implemented');
@@ -193,7 +255,8 @@ function main()
 		return 1;
 	}
 
-	let conf=config.load(CONFIG_PATH);
+	conf=config.load(CONFIG_PATH);
+	db=db.create(conf.db_dir);
 
 	console.log('starting HTTPS server at port', conf.server_port);
 

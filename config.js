@@ -12,6 +12,12 @@ function load_config(path)
 
 	verify_conf(conf, path);
 
+	if (!('private_key' in conf))
+		conf.private_key=fs.readFileSync(conf.node_privkey_path).toString();
+
+	if (!('public_key' in conf))
+		conf.public_key=fs.readFileSync(conf.node_pubkey_path).toString();
+	
 	return conf;
 }
 
@@ -22,6 +28,11 @@ function verify_conf(conf, path)
 
 	assert('node_name' in conf);
 	assert(typeof conf.node_name=="string");
+
+	assert('node_pubkey_path' in conf);
+	assert(typeof conf.node_pubkey_path=="string");
+	assert(fs.existsSync(conf.node_pubkey_path),
+		'no node public key found at: ' + conf.node_pubkey_path)
 
 	assert('node_privkey_path' in conf);
 	assert(typeof conf.node_privkey_path=="string");
@@ -44,10 +55,13 @@ function verify_conf(conf, path)
 	assert('server_port' in conf);
 	assert(typeof conf.server_port=="number");
 
+	assert('db_dir' in conf);
+	assert(typeof conf.db_dir=="string");
+
 	for (let key in conf) {
 		assert(['node_name', 'log_path', 'node_privkey_path',
-		'https_cert_path', 'https_privkey_path', 'config_version',
-		'server_port'].includes(key),
+		'node_pubkey_path', 'https_cert_path', 'https_privkey_path',
+		'config_version', 'server_port', 'db_dir'].includes(key),
 			'unknown config key: ' + key);
 	}
 }
