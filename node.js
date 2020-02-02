@@ -79,7 +79,7 @@ function can_create(cid, uid, perm)
 		+ perm;
 }
 
-function check_user_descriptor(udesc)
+function check_user_descriptor(uid, udesc)
 {
 	for (let key in udesc)
 		if (!['pub_key', 'priv_key', 'username', 'home'].includes(key))
@@ -88,13 +88,26 @@ function check_user_descriptor(udesc)
 	if (!('pub_key' in udesc))
 		return false;
 	
+	// ensure pubkey either matches current state, or is unique
+	// among other users
+	let users=db.query_vals('.users', val => {
+		val.pub_key==udesc.pub_key;
+	});
+
+	if (typeof uid=="undefined") {
+		if (users.length)
+			return false; // user with such pubkey exists
+	} else {
+		return Object.keys(users).length==1 && uid in users;
+	}
+
 	return true;
 }
 
 function check_value(cid, uid, val)
 {
 	if (cid=='.users')
-		return check_user_descriptor(val);
+		return check_user_descriptor(uid, val);
 	return true;
 }
 
@@ -248,6 +261,12 @@ function serve(req, res)
 	}
 }
 
+function init_node()
+{
+	// validate or create node descriptor
+	console.warn('WARNING: implement init_node');
+}
+
 function main()
 {
 	if (process.argv.length>2) {
@@ -257,6 +276,8 @@ function main()
 
 	conf=config.load(CONFIG_PATH);
 	db=db.create(conf.db_dir);
+
+	init_node();
 
 	console.log('starting HTTPS server at port', conf.server_port);
 

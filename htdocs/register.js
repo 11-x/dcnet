@@ -26,29 +26,14 @@ async function register_btn_clicked()
 
 	btn.disabled=true;
 
-	let uid=await node.register(user, pass);
+	try {
+		let uid=await node.register(user, pass);
 
-	console.log('user registered:', uid);
+		console.log('user registered:', uid);
 
-	console.log(err);
-
-	if (err) {
-	} else {
-
+		page.go('gate');
+	} catch (err) {
+		console.error('registration failed:', err);
 	}
-
-	throw "not implemented";
-	
-	dcn.register(user, pass, undefined, function()
-	{
-		dcn.login(user, pass, function() {
-			window.location.href="/";
-		}, function(err_msg) {
-			alert('Registration OK, but login failed: ' + err_msg);
-			btn.disabled=false;
-		});
-	}, function(err_msg) {
-		alert('Registration failed: ' + err_msg);
-		btn.disabled=false;
-	});
+	btn.disabled=false;
 }
