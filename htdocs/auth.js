@@ -2,6 +2,13 @@ class Auth {
 	constructor() {
 	}
 
+	get is_purged() {
+		return typeof this._uid=="undefined"
+			&& typeof this._privkey=="undefined"
+			&& typeof this._username=="undefined"
+			&& typeof this._pass=="undefined";
+	}
+
 	get is_logged_in() {
 		return typeof this._uid!="undefined"
 			&& typeof this._privkey!="undefined";

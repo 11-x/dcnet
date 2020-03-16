@@ -5,6 +5,7 @@ function gate_loaded()
 	let el_username=document.getElementById('username');
 	let el_pass=document.getElementById('pass');
 	let el_login_btn=document.getElementById('login_btn');
+	let el_forgetme_btn=document.getElementById('forgetme_btn');
 
 	el_username.focus();
 
@@ -18,6 +19,9 @@ function gate_loaded()
 		if (auth.username)
 			el_login_btn.focus();
 	}
+
+	if (auth.is_purged)
+		el_forgetme_btn.disabled=true;
 }
 
 function login_btn_clicked()
