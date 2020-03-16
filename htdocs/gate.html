@@ -1,5 +1,7 @@
 <div id="body_content">
-	<p><a href="/" class="logo">DCNet</a></p>
+	<p><a href="javascript:void(0)"
+		onclick="page.go('gate'); event.preventDefault();"
+		class="logo">DCNet</a></p>
 	<p><input
 		id="username"
 		placeholder="username"
@@ -13,15 +15,25 @@
 		type="password"
 		onkeypress="input_keypressed();"
 	/></p>
-	<p><button
-		id="login_btn"
-		onclick="login_btn_clicked();"
-	>Войти</button></p>
+	<p>
+		<button
+			id="login_btn"
+			onclick="login_btn_clicked();"
+		>Войти</button>
+		&nbsp;
+		<button
+			id="forgetme_btn"
+			onclick="forget_me();"
+		>Забыть меня</button>
+	</p>
 	<p><a href="javascript:void(0)" 
 		onclick="page.go('register'); event.preventDefault();"
 		>Зарегистрироваться</a></p>
-	<p><a href="readme.html"
+	<p><a href="javascript:void(0)" 
+		onclick="page.go('readme'); event.preventDefault();"
 		>Что это за место?</a></p>
-	<p><a href="#" onclick="forget()"
+<!--	<p><a href="javascript:void(0)"
+		onclick="forget_me(); event.preventDefault();"
 		>Забыть меня</a></p>
+		-->
 </div>
