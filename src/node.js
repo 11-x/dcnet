@@ -257,6 +257,12 @@ function serve(req, res)
 						'Content-type':
 							'text/html; charset=utf-8'
 				});
+			} else if (req.url.endsWith(".css")) {
+				return respond(res, 200, 'OK',
+					fs.readFileSync(req.url.slice(1)), {
+						'Content-type':
+							'text/css; charset=utf-8'
+				});
 			} else {
 				return respond(res, 400, 'Bad Request');
 			}

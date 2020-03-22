@@ -62,7 +62,8 @@ class Auth {
 			return this._uid;
 		} else {
 			console.error('user registration failed', res);
-			throw new Error('User registration failed');
+			throw new Error('Server refused to register: ' + res.reason
+				+ ': ' + res.data);
 		}
 	}
 }

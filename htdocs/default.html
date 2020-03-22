@@ -3,16 +3,19 @@
 	<meta http-equiv="Content-Type"
 		content="text/html;charset=UTF-8" />
 	<head>
-		<script src="htdocs/main.js"></script>
+		<link rel="stylesheet" href="htdocs/style.css" />
 		<script src="htdocs/auth.js"></script>
-		<script src="htdocs/page.js"></script>
-		<script src="htdocs/node.js"></script>
-		<script src="htdocs/gate.js"></script>
 		<script src="htdocs/crypt.js"></script>
+		<script src="htdocs/error.js"></script>
+		<script src="htdocs/gate.js"></script>
+		<script src="htdocs/main.js"></script>
+		<script src="htdocs/node.js"></script>
+		<script src="htdocs/page.js"></script>
 		<script src="htdocs/register.js"></script>
 		<script language="javascript">
 			function _main()
 			{
+				page=new Page();
 				if (typeof main=="function") {
 					return main();
 				} else {

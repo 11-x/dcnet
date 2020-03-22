@@ -1,0 +1,6 @@
+.error {
+	color: #f00;
+	font-size: 20pt;
+	border-style: solid;
+	border-color: #000;
+}

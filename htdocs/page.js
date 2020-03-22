@@ -1,3 +1,9 @@
+function escapeHTML(text) {
+	let span=document.createElement('span');
+	span.innerText=text;
+	return span.innerHTML;
+}
+
 class Page
 {
 	constructor() {
@@ -11,6 +17,14 @@ class Page
 
 		this._target=null;
 		this._targets_cache={};
+
+		let doc_body=document.getElementsByTagName("body")[0];
+
+		this._head=document.createElement("div");
+		doc_body.appendChild(this._head);
+
+		this._body=document.createElement("div");
+		doc_body.appendChild(this._body);
 	}
 
 	async close() {
@@ -21,16 +35,7 @@ class Page
 				await closing();
 		}
 
-		this.body.innerHTML='';
-	}
-
-	get body() {
-		if (typeof this._body=="undefined") {
-			this._body=document.createElement("div");
-			document.getElementsByTagName("body")[0].appendChild(
-				this._body);
-		}
-		return this._body;
+		this._body.innerHTML='';
 	}
 
 	async fetch(target) {
@@ -51,14 +56,14 @@ class Page
 
 		if (resp.code==404) {
 			console.error(resp);
-			this.body.innerHTML='404 Not Found';
+			this._body.innerHTML='404 Not Found';
 			return;
 		} else if (resp.code!=200) {
 			console.error(resp);
 			return;
 		}
 
-		this.body.innerHTML=resp.data;
+		this._body.innerHTML=resp.data;
 
 		if (set_new_state)
 			window.history.pushState(target, target, target);
@@ -68,6 +73,14 @@ class Page
 
 		this._target=target;
 	}
-}
 
-var page=new Page();
+	error(msg) {
+		page.go('error').then(() => {
+			document.getElementById('err_div').innerText=msg;
+		});
+	}
+
+	back() {
+		history.back();
+	}
+}
