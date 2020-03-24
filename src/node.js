@@ -83,21 +83,27 @@ function check_user_descriptor(uid, udesc)
 {
 	for (let key in udesc)
 		if (!['pub_key', 'priv_key', 'username', 'home'].includes(key))
-			return false;
+			throw "unexpected key in user descriptor: " + key;
+			//return false;
 	
 	if (!('pub_key' in udesc))
-		return false;
+		throw "no pub_key provided";
+		//return false;
 
 	// ensure pubkey either matches current state, or is unique
 	// among other users
 	let users=db.query_vals('.users', val => val.pub_key==udesc.pub_key);
 
 	if (typeof uid=="undefined") {
+		// user is being created
 		if (Object.keys(users).length)
-			return false; // user with such pubkey exists
+			throw "public key already exists";
+		//	return false; // user with such pubkey exists
 	} else {
+		// the descriptor is being updated
 		if (!(Object.keys(users).length==1 && uid in users))
-			return false;
+			throw "no such user/key, uid=" + uid;
+			//return false;
 	}
 
 	// ensure username is unique among other users
@@ -105,10 +111,13 @@ function check_user_descriptor(uid, udesc)
 
 	if (typeof uid=="undefined") {
 		if (Object.keys(users).length)
-			return false; // user with such username exists
+			throw "duplicate username";
+			//return false; // user with such username exists
 	} else {
 		if (!(Object.keys(users).length==1 && uid in users))
-			return false;
+			throw "no such user/username, uid=" + uid + ", username="
+				+ udesc.username;
+			//return false;
 	}
 
 	return true;
@@ -149,8 +158,12 @@ async function POST_chan(res, cid, ureq)
 		if (!can_create(cid, data.uid, ureq.perm))
 			return respond(res, 403, 'Not Authorized');
 
+		try {
 		if (!check_value(cid, data.uid, data.val))
 			throw "Invalid value";
+		} catch (err) {
+			throw "Invalid value: " + err;
+		}
 
 		let iid=db.reserve(data.cid);
 
