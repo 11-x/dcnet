@@ -111,7 +111,7 @@ function check_user_descriptor(uid, udesc)
 
 	if (typeof uid=="undefined") {
 		if (Object.keys(users).length)
-			throw "duplicate username";
+			throw "Username already exists: " + udesc.username;
 			//return false; // user with such username exists
 	} else {
 		if (!(Object.keys(users).length==1 && uid in users))

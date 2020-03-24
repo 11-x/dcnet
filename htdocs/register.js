@@ -33,7 +33,7 @@ async function register_btn_clicked()
 
 		page.go('gate');
 	} catch (err) {
-		page.error('registration failed: ' + err.message);
+		page.error('Registration failed: ' + err.message);
 	}
 	btn.disabled=false;
 }

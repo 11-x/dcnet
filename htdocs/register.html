@@ -1,5 +1,7 @@
 <div id="body_content">
-	<p><a href="/" class="logo">DCNet</a>: Регистрация</p>
+	<p><a href="javascript:void(0)"
+		onclick="page.go('gate'); event.preventDefault();"
+		class="logo">DCNet</a></p>
 	<p><input id="user" placeholder="username"
 		autocomplete="off" autocapitalize="off"
 		value="temp_user"
@@ -17,5 +19,7 @@
 		id="register_btn"
 		onclick="register_btn_clicked();"
 	>Зарегистрироваться</button></p>
-	<a href="/">Отменить</a>
+	<p><a href="javascript:void(0)"
+		onclick="page.go('gate'); event.preventDefault();"
+		class="logo">На главную</a></p>
 </div>

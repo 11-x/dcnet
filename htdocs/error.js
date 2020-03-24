@@ -1,6 +1,6 @@
 function error_loaded()
 {
-	arrange('body_content', "80%");
+		arrange('body_content', "800");
 }
 
 function center_table(width, el)

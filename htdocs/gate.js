@@ -27,6 +27,7 @@ function gate_loaded()
 function login_btn_clicked()
 {
 	// ensure .chans is synced and seek for username
+	return page.error('Not implemented');
 	throw "not implemented";
 
 	var btn=document.getElementById('login_btn');
